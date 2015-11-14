@@ -1,0 +1,161 @@
+Helpers
+	all = [0 .. 0xFFFF];
+    	digit = ['0' .. '9'] ;
+    	hex = [0..0x0fff];
+    	caractere = ['a'..'z'] | ['A'..'Z'];
+   	tab = 9;
+	lf = 10;
+	cr = 13;
+   	apostrofo = ''';
+   	aspas = '"';
+   	not_eol = [all - [cr + lf]];
+	eol = cr lf | cr | lf;
+	sp = ' ';
+
+States
+	normal, comment;
+
+Tokens
+/* eol = fim de linha */
+
+	//Lacos
+	{normal}for 							= 'for';
+	{normal}while 							= 'while';
+
+	//Condicionais
+	{normal}if 								= 'if' sp*;
+	{normal}else 							= 'else';
+	{normal}case 							= 'case';
+	{normal}switch 							= 'switch';
+
+	//Operadores e atribuicao
+	{normal}op  		 					= ('+' | '-')sp*;
+	{normal}mul 							= '*'  sp*;
+	{normal}div  							=  '\' sp*;
+	{normal}attr 							= '=' sp*;
+	
+	
+	//Condicionais
+	
+	{normal}maior 							= '>' sp*;
+	{normal}menor 							= '<' sp*;
+	{normal}equal 							= '==' sp*;
+	{normal}maior_igual 					= '>=' sp*;
+	{normal}menor_igual 					= '<=' sp*;
+	
+	//Operacoes booleanas
+	
+	{normal}and								= '&&' sp*;
+	{normal}or								= '|'  sp*;
+
+	//Tipos
+	{normal}array 							= 'array' sp*;
+	{normal}int 							= 'int' sp*;
+	{normal}char 							= 'char' sp*;
+	{normal}float 							= 'float' sp*;
+
+	//Tipos alguma coisa
+	{normal}num_int 						= ('0x')?digit+ ;
+	{normal}caractere_char 					= apostrofo caractere apostrofo;
+	{normal}float_number 					= digit+ '.'(digit+|'e'('+'|'-')digit+);
+
+
+
+	//Pontuacao
+	{normal}key_e 							= '{';
+	{normal}key_d 							= '}';
+	{normal}parenthesis_e 					= '(';
+	{normal}parenthesis_d 					= ')';
+	{normal}semi							= ';' lf?;
+	{normal}comma 							= ',';
+
+	//Espaco
+
+	//Comentario
+	{normal->comment, comment} comment 		= '/*';
+	{comment->normal} comment_end 			= '*/';
+	{comment} comment_body 					= [all - ['*' + '/']]*;
+	{comment} star 							= '*';
+	{comment} slash 						= '/';
+	{normal} line_comment 					= '//'[all - 10]*10*;
+	sp = ' ' sp*;
+
+	{normal}begin 							= 'begin';
+	{normal}end 							= 'end';
+	{normal}return 							= 'return' sp*;
+	{normal}void 							= 'void';
+	{normal}new 							= 'new';
+
+	{normal} blank 							= (eol | tab | ' ')+;
+
+	//identificador
+	{normal}identificador 					= caractere (caractere|digit)* sp*;
+
+/*Funcionou desse jeito
+	program 								= begin variables end semi;
+	variables 								=  int semi ;
+	*/
+
+	/*Boiolagem de erro quando coloco da forma {coma identificador}
+	  O erro e o seguinte:org.sablecc.sablecc.parser.ParserException: [86,32] expecting: '->'
+		Para contornar esse problema, olhei a documentação do sablecc, e vi que para as producoes para
+		terem opcoes, voce tem que identificar essas opcoes com { identificacao }. Pagina 45 da tese do sablecc.
+*/
+
+Ignored Tokens
+	blank, comment, comment_end, comment_body, line_comment;
+
+Productions
+
+	programa     = begin declaracao* end;
+
+	declaracao   = tipo identificador decl | {atribuicao}attr_var;
+	
+	/*Fiz uma pequena fatoracao a esquerda, havia dois tipos de declaracoes onde mudavam apenas o final,
+	 logo fatorei como tinha na prova, para tirar ambiguidade e ficar mais bonito.
+	*/
+	
+	decl = semi | {funcao}parenteses body;
+
+	tipo 	     = {inteiro} int |
+			       {charizard} char | 
+			       {floatomon} float;
+
+	parenteses   = parenthesis_e parameters* parenthesis_d;
+	
+	parameters 	 = 	tipo identificador comma|
+					{more10one}tipo identificador;
+
+	body 	     = 	key_e block;
+	
+	block        =	declaracao block|
+					{opt2}identificador parenteses block|
+					{opt3}condicional block|
+					{opt4}return identificador semi|
+					{opt5}key_d;
+					
+					
+	attr_var     =	identificador attr valores semi|
+					{opt2}tipo identificador attr valores semi;
+	
+	valores      =  num_int|
+					{chari}caractere_char|
+					{floato}float_number|
+					{iden}identificador;
+	
+	condicional  = 	if parenthesis_e condicao parenthesis_d key_e block key_d;
+					
+	condicao	 =	identificador|
+					{condicao2}identificador operacao valores|
+					{condicao3}identificador operacao valores expressoes;
+					
+	expressoes 		= and |{ou} or;
+	
+	operacao 	 	= maior| {op2}menor | {op3}equal;
+	
+	
+	/*
+	Tomar cuidado com os conflitos shift-reduce e reduce reduce, peguei 1 quando tentei fazer dois tipos de parameters, um para declaração de funcão
+	e outro para chamada de função.Ele executa normal, mas quando chega na criação de arvores ou do DFA da erro.
+	*/
+
