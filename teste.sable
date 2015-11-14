@@ -132,7 +132,8 @@ Productions
 					{opt2}identificador parenteses block|
 					{opt3}condicional block|
 					{opt4}return identificador semi|
-					{opt5}key_d;
+					{opt5}laco|
+					{opt6}key_d;
 					
 					
 	attr_var     =	identificador attr valores semi|
@@ -152,6 +153,11 @@ Productions
 	expressoes 		= and |{ou} or;
 	
 	operacao 	 	= maior| {op2}menor | {op3}equal;
+	
+	laco = lacos_operadores parenthesis_e condicao parenthesis_d  key_e block key_d;
+	
+	lacos_operadores =  for|
+						{opt2}while;
 	
 	
 	/*

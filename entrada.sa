@@ -1,0 +1,15 @@
+begin
+int a; 
+char b;
+int a(int a,float b){
+	if(asda > 3)
+	{
+		return a;
+	}
+	a = 4;
+	for(a)
+	{
+	}
+}
+int a = 4;
+end
