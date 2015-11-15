@@ -98,7 +98,7 @@ Tokens
 
 	/*Boiolagem de erro quando coloco da forma {coma identificador}
 	  O erro e o seguinte:org.sablecc.sablecc.parser.ParserException: [86,32] expecting: '->'
-		Para contornar esse problema, olhei a documentaÁ„o do sablecc, e vi que para as producoes para
+		Para contornar esse problema, olhei a documenta√ß√£o do sablecc, e vi que para as producoes para
 		terem opcoes, voce tem que identificar essas opcoes com { identificacao }. Pagina 45 da tese do sablecc.
 */
 
@@ -144,7 +144,12 @@ Productions
 					{floato}float_number|
 					{iden}identificador;
 	
-	condicional  = 	if parenthesis_e condicao parenthesis_d key_e block key_d;
+	se = if parenthesis_e condicao parenthesis_d key_e block key_d;
+	
+	se_nao = {vazio} | {senao} else key_e block key_d;
+	
+	condicional  = 	se se_nao;
+	
 					
 	condicao	 =	identificador|
 					{condicao2}identificador operacao valores|
@@ -161,7 +166,6 @@ Productions
 	
 	
 	/*
-	Tomar cuidado com os conflitos shift-reduce e reduce reduce, peguei 1 quando tentei fazer dois tipos de parameters, um para declaraÁ„o de func„o
-	e outro para chamada de funÁ„o.Ele executa normal, mas quando chega na criaÁ„o de arvores ou do DFA da erro.
+	Tomar cuidado com os conflitos shift-reduce e reduce reduce, peguei 1 quando tentei fazer dois tipos de parameters, um para declara√ß√£o de func√£o
+	e outro para chamada de fun√ß√£o.Ele executa normal, mas quando chega na cria√ß√£o de arvores ou do DFA da erro.
 	*/
-
