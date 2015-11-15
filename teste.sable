@@ -30,8 +30,8 @@ Tokens
 
 	//Operadores e atribuicao
 	{normal}op  		 					= ('+' | '-')sp*;
-	{normal}multiplicacao 					= '*'  sp*;
-	{normal}divisao  						=  '\' sp*;
+	{normal}mul 							= '*'  sp*;
+	{normal}div  							=  '\' sp*;
 	{normal}attr 							= '=' sp*;
 	
 	
@@ -55,17 +55,17 @@ Tokens
 	{normal}float 							= 'float' sp*;
 
 	//Tipos alguma coisa
-	{normal}num_int 						= ('0x')?digit+ sp*;
-	{normal}caractere_char 					= apostrofo caractere apostrofo sp*;
-	{normal}float_number 					= digit+ '.'(digit+|'e'('+'|'-')digit+) sp*;
+	{normal}num_int 						= ('0x')?digit+ ;
+	{normal}caractere_char 					= apostrofo caractere apostrofo;
+	{normal}float_number 					= digit+ '.'(digit+|'e'('+'|'-')digit+);
 
 
 
 	//Pontuacao
-	{normal}chave_e 						= '{';
-	{normal}chave_d 						= '}';
-	{normal}parenteses_e 					= '(';
-	{normal}parenteses_d 					= ')';
+	{normal}key_e 							= '{';
+	{normal}key_d 							= '}';
+	{normal}parenthesis_e 					= '(';
+	{normal}parenthesis_d 					= ')';
 	{normal}semi							= ';' lf?;
 	{normal}comma 							= ',';
 
@@ -75,8 +75,8 @@ Tokens
 	{normal->comment, comment} comment 		= '/*';
 	{comment->normal} comment_end 			= '*/';
 	{comment} comment_body 					= [all - ['*' + '/']]*;
-	{comment} asteristico 							= '*';
-	{comment} barra 						= '/';
+	{comment} star 							= '*';
+	{comment} slash 						= '/';
 	{normal} line_comment 					= '//'[all - 10]*10*;
 	sp = ' ' sp*;
 
@@ -109,8 +109,7 @@ Productions
 
 	programa     = begin declaracao* end;
 
-	declaracao   = tipo identificador decl | 
-				   {atribuicao}attr_var;
+	declaracao   = tipo identificador decl | {atribuicao}attr_var;
 	
 	/*Fiz uma pequena fatoracao a esquerda, havia dois tipos de declaracoes onde mudavam apenas o final,
 	 logo fatorei como tinha na prova, para tirar ambiguidade e ficar mais bonito.
@@ -122,36 +121,30 @@ Productions
 			       {charizard} char | 
 			       {floatomon} float;
 
-	parenteses   = parenteses_e parametros* parenteses_d;
+	parenteses   = parenthesis_e parameters* parenthesis_d;
 	
-	parametros 	 = 	tipo identificador comma|
+	parameters 	 = 	tipo identificador comma|
 					{more10one}tipo identificador;
 
-	body 	     = 	chave_e bloco;
+	body 	     = 	key_e block;
 	
-	bloco        =	declaracao bloco|
-					{opt2}identificador parenteses bloco|
-					{opt3}condicional bloco|
+	block        =	declaracao block|
+					{opt2}identificador parenteses block|
+					{opt3}condicional block|
 					{opt4}return identificador semi|
 					{opt5}laco|
-					{opt6}chave_d;
+					{opt6}key_d;
 					
 					
-	attr_var     =	identificador attr operacao semi|
-					{opt2}tipo identificador attr valores semi;					
-    
-    operacao 	 =	valores operador operacao|
-    				{valor}valores;
-	
-	operador	= 	op|
-					{mul}multiplicacao|
-					{div}divisao;
+	attr_var     =	identificador attr valores semi|
+					{opt2}tipo identificador attr valores semi;
 	
 	valores      =  num_int|
 					{chari}caractere_char|
 					{floato}float_number|
 					{iden}identificador;
 	
+<<<<<<< HEAD
 <<<<<<< HEAD
 	condicional  = 	if parenteses_e condicao parenteses_d chave_e bloco chave_d;
 =======
@@ -162,18 +155,19 @@ Productions
 	condicional  = 	se se_nao;
 	
 >>>>>>> origin/master
+=======
+	condicional  = 	if parenthesis_e condicao parenthesis_d key_e block key_d;
+>>>>>>> parent of d7dd947... Modificacoes
 					
 	condicao	 =	identificador|
-					{condicao2}identificador sinais valores|
-					{condicao3}identificador sinais valores expressoes;
+					{condicao2}identificador operacao valores|
+					{condicao3}identificador operacao valores expressoes;
 					
 	expressoes 		= and |{ou} or;
 	
-	sinais 	 	= 	  maior| 
-					  {op2}menor | 
-					  {op3}equal;
+	operacao 	 	= maior| {op2}menor | {op3}equal;
 	
-	laco = lacos_operadores parenteses_e condicao parenteses_d  chave_e bloco chave_d;
+	laco = lacos_operadores parenthesis_e condicao parenthesis_d  key_e block key_d;
 	
 	lacos_operadores =  for|
 						{opt2}while;
@@ -181,7 +175,11 @@ Productions
 	
 	/*
 <<<<<<< HEAD
+<<<<<<< HEAD
 	Tomar cuidado com os conflitos shift-reduce e reduce reduce, peguei 1 quando tentei fazer dois tipos de parametros, um para declaração de funcão
+=======
+	Tomar cuidado com os conflitos shift-reduce e reduce reduce, peguei 1 quando tentei fazer dois tipos de parameters, um para declaração de funcão
+>>>>>>> parent of d7dd947... Modificacoes
 	e outro para chamada de função.Ele executa normal, mas quando chega na criação de arvores ou do DFA da erro.
 =======
 	Tomar cuidado com os conflitos shift-reduce e reduce reduce, peguei 1 quando tentei fazer dois tipos de parameters, um para declaraÃ§Ã£o de funcÃ£o
