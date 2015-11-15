@@ -152,8 +152,13 @@ Productions
 					{floato}float_number|
 					{iden}identificador;
 	
+	se = if parenteses_e condicao parenteses_d chave_e bloco;
+	
+	se_nao = {vazio} | {senao} else chave_e bloco ;
+	
+	condicional  = 	se se_nao;
 
-	condicional  = 	if parenteses_e condicao parenteses_d chave_e bloco;
+	//condicional  = 	if parenteses_e condicao parenteses_d chave_e bloco;
 
 					
 	condicao	 =	identificador|
