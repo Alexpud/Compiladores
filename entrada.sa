@@ -4,7 +4,11 @@ char b;
 int a(int a,float b){
 	if(asda > 3)
 	{
-		return a;
+		 return a;
+	}
+	else
+	{
+		return b;
 	}
 	a = 4;
 	for(a)
