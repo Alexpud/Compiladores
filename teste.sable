@@ -133,7 +133,7 @@ Productions
 					{opt2}identificador parenteses bloco|
 					{opt3}condicional bloco|
 					{opt4}return identificador semi chave_d|
-					{opt5}laco|
+					{opt5}laco bloco|
 					{opt6}chave_d;
 					
 					
@@ -166,7 +166,7 @@ Productions
 					  {op2}menor | 
 					  {op3}equal;
 	
-	laco = lacos_operadores parenteses_e condicao parenteses_d  chave_e bloco chave_d;
+	laco = lacos_operadores parenteses_e condicao parenteses_d  chave_e bloco;
 	
 	lacos_operadores =  for|
 						{opt2}while;
