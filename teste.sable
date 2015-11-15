@@ -25,7 +25,7 @@ Tokens
 	//Condicionais
 	{normal}if 								= 'if' sp*;
 	{normal}else 							= 'else';
-	{normal}case 							= 'case';
+	{normal}case 							= 'case' sp*;
 	{normal}switch 							= 'switch';
 
 	//Operadores e atribuicao
@@ -68,6 +68,7 @@ Tokens
 	{normal}parenteses_d 					= ')';
 	{normal}semi							= ';' lf?;
 	{normal}comma 							= ',';
+	{normal}dois_pontos						= ':' sp*;
 
 	//Espaco
 
@@ -156,10 +157,22 @@ Productions
 	
 	se_nao = {vazio} | {senao} else chave_e bloco ;
 	
-	condicional  = 	se se_nao;
+	condicional  = 	se se_nao|
+					{switches} avalie;
 
 	//condicional  = 	if parenteses_e condicao parenteses_d chave_e bloco;
-
+	
+	avalie = switch parenteses_e valores parenteses_d chave_e case caso;
+	
+	caso = valores dois_pontos bloco_switch;
+	
+	bloco_switch = 	case caso|
+					{opt1}declaracao bloco_switch|
+					{opt2}identificador parenteses bloco_switch|
+					{opt3}condicional bloco_switch|
+					{opt4}return identificador semi|
+					{opt5}laco bloco_switch|
+					{opt6}chave_d semi;
 					
 	condicao	 =	identificador|
 					{condicao2}identificador sinais valores|
@@ -172,6 +185,8 @@ Productions
 					  {op3}equal;
 	
 	laco = lacos_operadores parenteses_e condicao parenteses_d  chave_e bloco;
+	
+	
 	
 	lacos_operadores =  for|
 						{opt2}while;

@@ -6,16 +6,16 @@ int a(int a,float b){
 	{
 		b=2+2;
 		if(a){
-			a = 4;
-			if(b){}
-		}else{a=4;}
+		a=2;
+		}
 		return a;
 	}
 	a = 4+2;
-	for(a)
+	switch(4)
 	{
-	}
-	 a = 4;
+		case 1: b = 2;
+		case 2: a = 2;
+	};
 }
 int a = 4;
 end
