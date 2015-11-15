@@ -170,7 +170,7 @@ Productions
 					{opt1}declaracao bloco_switch|
 					{opt2}identificador parenteses bloco_switch|
 					{opt3}condicional bloco_switch|
-					{opt4}return identificador semi|
+					{opt4}return identificador semi bloco_switch|
 					{opt5}laco bloco_switch|
 					{opt6}chave_d semi;
 					
