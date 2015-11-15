@@ -4,13 +4,14 @@ char b;
 int a(int a,float b){
 	if(asda > 3)
 	{
-		 return a;
+		b=2+2;
+		if(a){
+			a = 4;
+			if(b){}
+		}
+		return a;
 	}
-	else
-	{
-		return b;
-	}
-	a = 4;
+	a = 4+2;
 	for(a)
 	{
 	}
