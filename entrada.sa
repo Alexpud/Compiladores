@@ -8,13 +8,14 @@ int a(int a,float b){
 		if(a){
 			a = 4;
 			if(b){}
-		}
+		}else{a=4;}
 		return a;
 	}
 	a = 4+2;
 	for(a)
 	{
 	}
+	 a = 4;
 }
 int a = 4;
 end
