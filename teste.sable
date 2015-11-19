@@ -108,7 +108,7 @@ Ignored Tokens
 
 Productions
 
-	programa     = begin declaracao* end;
+	programa     = declaracao*;
 
 	declaracao   = tipo identificador decl | 
 				   {atribuicao}attr_var;
@@ -185,8 +185,6 @@ Productions
 					  {op3}equal;
 	
 	laco = lacos_operadores parenteses_e condicao parenteses_d  chave_e bloco;
-	
-	
 	
 	lacos_operadores =  for|
 						{opt2}while;
