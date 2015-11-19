@@ -117,21 +117,21 @@ Productions
 	 logo fatorei como tinha na prova, para tirar ambiguidade e ficar mais bonito.
 	*/
 	
-	decl = semi | {funcao}parenteses body;
+	decl = {variavel}semi | {funcao}parametros body;
 
 	tipo 	     = {inteiro} int |
 			       {charizard} char | 
 			       {floatomon} float;
 
-	parenteses   = parenteses_e parametros* parenteses_d;
+	parametros   = parenteses_e parametros_variaveis* parenteses_d;
 	
-	parametros 	 = 	tipo identificador comma|
+	parametros_variaveis	 = 	tipo identificador comma|
 					{more10one}tipo identificador;
 
 	body 	     = 	chave_e bloco;
 	
 	bloco        =	declaracao bloco|
-					{opt2}identificador parenteses bloco|
+					{opt2}identificador parametros bloco|
 					{opt3}condicional bloco|
 					{opt4}return identificador semi chave_d|
 					{opt5}laco bloco|
@@ -141,10 +141,10 @@ Productions
 	attr_var     =	identificador attr operacao semi|
 					{opt2}tipo identificador attr valores semi;					
     
-    operacao 	 =	valores operador operacao|
+    	operacao 	 =	valores operadores operacao|
     				{valor}valores;
 	
-	operador	= 	op|
+	operadores	= 	op|
 					{mul}multiplicacao|
 					{div}divisao;
 	
@@ -168,7 +168,7 @@ Productions
 	
 	bloco_switch = 	case caso|
 					{opt1}declaracao bloco_switch|
-					{opt2}identificador parenteses bloco_switch|
+					{opt2}identificador parametros bloco_switch|
 					{opt3}condicional bloco_switch|
 					{opt4}return identificador semi bloco_switch|
 					{opt5}laco bloco_switch|
