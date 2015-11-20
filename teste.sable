@@ -20,6 +20,7 @@ Tokens
 
 	//Lacos
 	{normal}for 							= 'for';
+	{normal}foreach							= 'for each';
 	{normal}while 							= 'while';
 
 	//Condicionais
@@ -33,6 +34,8 @@ Tokens
 	{normal}multiplicacao 					= '*'  sp*;
 	{normal}divisao  						=  '\' sp*;
 	{normal}attr 							= '=' sp*;
+	{normal}incremento						= '++';
+	{normal}decremento						= '--';
 	
 	
 	//Condicionais
@@ -67,7 +70,7 @@ Tokens
 	{normal}parenteses_e 					= '(';
 	{normal}parenteses_d 					= ')';
 	{normal}semi							= ';' lf?;
-	{normal}comma 							= ',';
+	{normal}virgula 							= ',';
 	{normal}dois_pontos						= ':' sp*;
 
 	//Espaco
@@ -75,7 +78,7 @@ Tokens
 	//Comentario
 	{normal->comment, comment} comment 		= '/*';
 	{comment->normal} comment_end 			= '*/';
-	{comment} comment_body 					= [all - ['*' + '/']]*;
+	{comment} comment_corpo 					= [all - ['*' + '/']]*;
 	{comment} asteristico 							= '*';
 	{comment} barra 						= '/';
 	{normal} line_comment 					= '//'[all - 10]*10*;
@@ -104,54 +107,71 @@ Tokens
 */
 
 Ignored Tokens
-	blank, comment, comment_end, comment_body, line_comment;
+	blank, comment, comment_end, comment_corpo, line_comment;
 
 Productions
 
 	programa     = declaracao*;
 
-	declaracao   = tipo identificador decl | 
-				   {atribuicao}attr_var;
+	declaracao   =  declaracao_variavel|
+					{funcao}declaracao_funcao;
+				   
+	declaracao_funcao 		= tipo identificador parametros corpo;
+	
+	declaracao_variavel    =	{criacao}tipo lista_variavel semi|
+								{atribuicao}identificador attr operacao_aritmetica semi|
+								{criacao_atribuicao}tipo identificador attr valores semi;
+
+	lista_variavel = identificador virgula lista_variavel|
+					 {as}identificador;
 	
 	/*Fiz uma pequena fatoracao a esquerda, havia dois tipos de declaracoes onde mudavam apenas o final,
 	 logo fatorei como tinha na prova, para tirar ambiguidade e ficar mais bonito.
-	*/
+	*/	
 	
-	decl = semi | {funcao}parenteses body;
+	tipo_base 	     = {inteiro} int |
+					   {charizard} char | 
+			           {floatomon} float;
+					   
+	tipo 			= tipo_base|
+					  {void}void;
 
-	tipo 	     = {inteiro} int |
-			       {charizard} char | 
-			       {floatomon} float;
-
-	parenteses   = parenteses_e parametros* parenteses_d;
+	parametros   = parenteses_e parametros_variaveis* parenteses_d;
 	
-	parametros 	 = 	tipo identificador comma|
-					{more10one}tipo identificador;
+	parametros_variaveis	 = 	{varios}tipo identificador virgula|
+								{unico}tipo identificador;
 
-	body 	     = 	chave_e bloco;
+	corpo 	     = 	chave_e bloco;
 	
 	bloco        =	declaracao bloco|
-					{opt2}identificador parenteses bloco|
+					{opt2}identificador parametros bloco|
 					{opt3}condicional bloco|
 					{opt4}return identificador semi chave_d|
 					{opt5}laco bloco|
 					{opt6}chave_d;
 					
 					
-	attr_var     =	identificador attr operacao semi|
-					{opt2}tipo identificador attr valores semi;					
+					
     
-    operacao 	 =	valores operador operacao|
+    operacao_aritmetica 	 =	valores operadores operacao_aritmetica|
     				{valor}valores;
+    /*parenteses_e operacao_aritmetica parenteses_d|
+								{assd}operacao_aritmetica operadores |
+				
+    							{valor}valores ;*/
+    							
+ 	
 	
-	operador	= 	op|
+	operadores	= 	op|
 					{mul}multiplicacao|
 					{div}divisao;
 	
-	valores      =  num_int|
-					{chari}caractere_char|
-					{floato}float_number|
+	valores      =  tipo_base_valores|
 					{iden}identificador;
+					
+	tipo_base_valores	= 	{numerointeiro}num_int|
+					{caractere}caractere_char|
+					{numerofloat}float_number;
 	
 	se = if parenteses_e condicao parenteses_d chave_e bloco;
 	
@@ -167,16 +187,16 @@ Productions
 	caso = valores dois_pontos bloco_switch;
 	
 	bloco_switch = 	case caso|
-					{opt1}declaracao bloco_switch|
-					{opt2}identificador parenteses bloco_switch|
-					{opt3}condicional bloco_switch|
-					{opt4}return identificador semi bloco_switch|
-					{opt5}laco bloco_switch|
-					{opt6}chave_d semi;
+					{declaracao}declaracao bloco_switch|
+					{chamadafuncao}identificador parametros bloco_switch|
+					{condicional}condicional bloco_switch|
+					{retorno}return identificador semi bloco_switch|
+					{laco}laco bloco_switch|
+					{chave_d}chave_d semi;
 					
 	condicao	 =	identificador|
-					{condicao2}identificador sinais valores|
-					{condicao3}identificador sinais valores expressoes;
+					{unica}identificador sinais valores|
+					{varias}identificador sinais valores expressoes;
 					
 	expressoes 		= and |{ou} or;
 	
@@ -184,14 +204,17 @@ Productions
 					  {op2}menor | 
 					  {op3}equal;
 	
-	laco = lacos_operadores parenteses_e condicao parenteses_d  chave_e bloco;
+	laco 		= 	{while} while parenteses_e condicao parenteses_d corpo|
+					{for}   for parenteses_e condicao_for parenteses_d corpo|
+					{foreach}foreach parenteses_e condicao_foreach parenteses_d corpo;
+			
+	condicao_for = {incremento}declaracao_variavel condicao semi identificador incremento|
+				   {decremento}declaracao_variavel condicao semi identificador decremento;
 	
-	lacos_operadores =  for|
-						{opt2}while;
-	
+	condicao_foreach	= tipo identificador dois_pontos [lol]:identificador;	
 	
 	/*
 
-	Tomar cuidado com os conflitos shift-reduce e reduce reduce, peguei 1 quando tentei fazer dois tipos de parametros, um para declaração de funcão
-	e outro para chamada de função.Ele executa normal, mas quando chega na criação de arvores ou do DFA da erro.
+	Tomar cuidado com os conflitos shift-reduce e reduce reduce, peguei 1 quando tentei fazer dois tipos de parametros, um para declaraï¿½ï¿½o de funcï¿½o
+	e outro para chamada de funï¿½ï¿½o.Ele executa normal, mas quando chega na criaï¿½ï¿½o de arvores ou do DFA da erro.
 	*/
