@@ -111,13 +111,16 @@ Ignored Tokens
 
 Productions
 
-	programa{->programa} = tipo{-> tipo.programa};
+	programa{->programa} = tipo{-> New programa(tipo)};
 	
-	tipo{->programa} = int{->New programa(int)};
+	tipo{->tipo} = tipo_base identificador semi{-> New tipo( tipo_base.tipo_base , identificador ) };
+	
+	tipo_base{->tipo_base} =					{inteiro} int {-> New tipo_base.inteiro(int)}|
+												{flutuante}float {->New tipo_base.flutuante(float)};
 					
 Abstract Syntax Tree
-
-programa = int;
-
-declaracao_variavel = [left]:declaracao_variavel [right]:declaracao_variavel;
+	programa = tipo;
+	tipo = [a]:tipo_base [asd]:identificador;
+	tipo_base = {inteiro} int|
+				{flutuante}float;
 					
