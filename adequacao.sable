@@ -118,7 +118,8 @@ Productions
 	declaracao{->declaracao}	= 	declaracao_variavel{-> New declaracao(declaracao_variavel)}|
 									{funcao}declaracao_funcao{-> New declaracao.funcao(declaracao_funcao)};
 	
-	declaracao_variavel{->declaracao_variavel}	= 	tipo identificador semi{-> New declaracao_variavel(tipo.tipo , identificador ) };
+	declaracao_variavel{->declaracao_variavel}	= 	tipo identificador semi {-> New declaracao_variavel(tipo.tipo , identificador )}|
+													{criacao_atribuicao}tipo identificador attr valores semi{->New declaracao_variavel.criacao_atribuicao(tipo,identificador,valores.valores)};
 	
 	declaracao_funcao{->declaracao_funcao}		=	tipo identificador parenteses_e parametros parenteses_d{-> New declaracao_funcao(tipo,identificador,[parametros.parametros_variaveis])};
 	
@@ -128,6 +129,12 @@ Productions
 	tipo_base{->tipo} 			=	{inteiro} int {-> New tipo.inteiro(int)}|
 									{flutuante}float {->New tipo.flutuante(float)}|
 									{caractere} char {->New tipo.caractere(char)};
+	
+	valores{->valores}      	=  	tipo_base_valores{->tipo_base_valores.valores};
+					
+	tipo_base_valores{->valores}	= 			{numerointeiro}num_int{->    New valores.numerointeiro(num_int)}|
+												{caractere}caractere_char{-> New valores.caractere(caractere_char)}|
+												{numerofloat}float_number{->New valores.numerofloat(float_number)};
 									
 	parametros{->parametros_variaveis*}	=	parametros_variaveis*{->[parametros_variaveis.parametros_variaveis]};
 	
@@ -138,7 +145,13 @@ Abstract Syntax Tree
 	programa 					=	declaracao*;
 	declaracao 					=	declaracao_variavel|
 									{funcao}declaracao_funcao;
-	declaracao_variavel 		=	[a]:tipo [asd]:identificador;
+	declaracao_variavel 		=	[a]:tipo [asd]:identificador|
+									{criacao_atribuicao}tipo identificador valores;
+	
+	valores						=	{numerointeiro}num_int|
+									{caractere}caractere_char|
+									{numerofloat}float_number;
+	
 	declaracao_funcao			=	tipo identificador parametros_variaveis*;
 	parametros_variaveis		=	{unico}tipo identificador|
 									{varios}virgula;
