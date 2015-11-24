@@ -111,22 +111,30 @@ Ignored Tokens
 
 Productions
 
-	programa{->programa} = declaracoes{-> New programa( declaracoes.declaracao )};
+	programa{->programa}		= 	declaracao{-> New programa (declaracao)};
 	
-	declaracoes{->declaracoes} = declaracao{-> declaracao.programa};
+	declaracao{->declaracao}	= 	declaracao_variavel{-> New declaracao(declaracao_variavel)}|
+									{funcao}declaracao_funcao{-> New declaracao.funcao(declaracao_funcao)};
 	
-	declaracao{->programa} = declaracao_variavel{-> declaracao_variavel.declaracao_variavel};
+	declaracao_variavel{->declaracao_variavel}	= 	tipo identificador semi{-> New declaracao_variavel(tipo.tipo , identificador ) };
 	
-	declaracao_variavel{->declaracao_variavel} = tipo_base identificador semi{-> New declaracao_variavel(tipo_base.tipo_base , identificador ) };
+	declaracao_funcao{->declaracao_funcao}		=	tipo identificador parenteses_e parenteses_d{-> New declaracao_funcao(tipo,identificador)};
 	
-	tipo_base{->tipo_base} =					{inteiro} int {-> New tipo_base.inteiro(int)}|
-												{flutuante}float {->New tipo_base.flutuante(float)}|
-												{caractere} char {->New tipo_base.caractere(char)};
+	tipo{->tipo}				= 	tipo_base{-> tipo_base.tipo}|
+									{void}void{-> New tipo.void(void)};
+	
+	tipo_base{->tipo} 			=	{inteiro} int {-> New tipo.inteiro(int)}|
+									{flutuante}float {->New tipo.flutuante(float)}|
+									{caractere} char {->New tipo.caractere(char)};
 					
 Abstract Syntax Tree
-	programa = declaracao_variavel*;
-	declaracao_variavel = [a]:tipo_base [asd]:identificador;
-	tipo_base = {inteiro} int|
-				{flutuante}float|
-				{caractere} char;
+	programa 					=	declaracao;
+	declaracao 					=	declaracao_variavel|
+									{funcao}declaracao_funcao;
+	declaracao_variavel 		=	[a]:tipo [asd]:identificador;
+	declaracao_funcao			=	tipo identificador;
+	tipo 						= 	{inteiro} int|
+									{flutuante}float|
+									{void}void|
+									{caractere} char;
 					
