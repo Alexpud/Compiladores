@@ -1,8 +1,8 @@
 Helpers
 	all = [0 .. 0xFFFF];
-    digit = ['0' .. '9'] ;
-    hex = [0..0x0fff];
-    caractere = ['a'..'z'] | ['A'..'Z'];
+    	digit = ['0' .. '9'] ;
+    	hex = [0..0x0fff];
+    	caractere = ['a'..'z'] | ['A'..'Z'];
    	tab = 9;
 	lf = 10;
 	cr = 13;
@@ -52,10 +52,7 @@ Tokens
 	{normal}or								= '|'  sp*;
 
 	//Tipos
-	//{normal}array 							= 'array' sp*;
-	{normal}array    						= caractere (caractere | digit | '_')* '['digit+']';
-    {normal}id      						= caractere (caractere | digit | '_')*;   
-    {normal}string   						= '"' [all - [[10 + 13] + '"']]* '"';
+	{normal}array 							= 'array' sp*;
 	{normal}int 							= 'int' sp*;
 	{normal}char 							= 'char' sp*;
 	{normal}float 							= 'float' sp*;
@@ -64,6 +61,8 @@ Tokens
 	{normal}num_int 						= ('0x')?digit+ sp*;
 	{normal}caractere_char 					= apostrofo caractere apostrofo sp*;
 	{normal}float_number 					= digit+ '.'(digit+|'e'('+'|'-')digit+) sp*;
+
+
 
 	//Pontuacao
 	{normal}chave_e 						= '{';
@@ -112,30 +111,22 @@ Ignored Tokens
 
 Productions
 
-	programa{->programa} = tipo{-> New programa(tipo)};
+	programa{->programa} = declaracoes{-> New programa( declaracoes.declaracao )};
 	
-	tipo{->tipo} = tipo_base identificador semi{-> New tipo( tipo_base.tipo_base , identificador ) };
+	declaracoes{->declaracoes} = declaracao{-> declaracao.programa};
 	
-	tipo_base{->tipo_base} =	{inteiro} int {-> New tipo_base.inteiro(int)}|
-								{flutuante}float {->New tipo_base.flutuante(float)};
-								
-	var {-> var} = {var} id {-> New var.var(id)}
- 			   | {var_array} array {-> New var.var_array(array)};
- 			   
- 	valor {-> valor} = 	{valor_string} string {-> New valor.valor_string(string)}
-			   |      	{valor_inteiro} num_int {-> New valor.valor_inteiro(num_int)}
-			   |        {valor_float} float_number {-> New valor.valor_float(float_number)};
+	declaracao{->programa} = declaracao_variavel{-> declaracao_variavel.declaracao_variavel};
+	
+	declaracao_variavel{->declaracao_variavel} = tipo_base identificador semi{-> New declaracao_variavel(tipo_base.tipo_base , identificador ) };
+	
+	tipo_base{->tipo_base} =					{inteiro} int {-> New tipo_base.inteiro(int)}|
+												{flutuante}float {->New tipo_base.flutuante(float)}|
+												{caractere} char {->New tipo_base.caractere(char)};
 					
 Abstract Syntax Tree
-	programa = tipo;
-	tipo = [a]:tipo_base [asd]:identificador;
+	programa = declaracao_variavel*;
+	declaracao_variavel = [a]:tipo_base [asd]:identificador;
 	tipo_base = {inteiro} int|
-				{flutuante}float;
-				
-	var = {var} id
- 		|{var_array} array;
- 			   
- 	valor = {valor_string} string
-		| {valor_inteiro} num_int
-	    | {valor_float} float_number;
+				{flutuante}float|
+				{caractere} char;
 					
