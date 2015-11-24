@@ -111,7 +111,7 @@ Ignored Tokens
 
 Productions
 
-	programa{->programa}		= 	declaracao{-> New programa (declaracao)};
+	programa{->programa}		= 	[decl]:declaracao*{-> New programa ([decl.declaracao])};
 	
 	declaracao{->declaracao}	= 	declaracao_variavel{-> New declaracao(declaracao_variavel)}|
 									{funcao}declaracao_funcao{-> New declaracao.funcao(declaracao_funcao)};
@@ -128,7 +128,7 @@ Productions
 									{caractere} char {->New tipo.caractere(char)};
 					
 Abstract Syntax Tree
-	programa 					=	declaracao;
+	programa 					=	declaracao*;
 	declaracao 					=	declaracao_variavel|
 									{funcao}declaracao_funcao;
 	declaracao_variavel 		=	[a]:tipo [asd]:identificador;
