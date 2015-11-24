@@ -120,7 +120,7 @@ Productions
 	
 	declaracao_variavel{->declaracao_variavel}	= 	tipo identificador semi{-> New declaracao_variavel(tipo.tipo , identificador ) };
 	
-	declaracao_funcao{->declaracao_funcao}		=	tipo identificador parenteses_e parenteses_d{-> New declaracao_funcao(tipo,identificador)};
+	declaracao_funcao{->declaracao_funcao}		=	tipo identificador parenteses_e parametros parenteses_d{-> New declaracao_funcao(tipo,identificador,[parametros.parametros_variaveis])};
 	
 	tipo{->tipo}				= 	tipo_base{-> tipo_base.tipo}|
 									{void}void{-> New tipo.void(void)};
@@ -128,13 +128,20 @@ Productions
 	tipo_base{->tipo} 			=	{inteiro} int {-> New tipo.inteiro(int)}|
 									{flutuante}float {->New tipo.flutuante(float)}|
 									{caractere} char {->New tipo.caractere(char)};
+									
+	parametros{->parametros_variaveis*}	=	parametros_variaveis*{->[parametros_variaveis.parametros_variaveis]};
+	
+	parametros_variaveis{->parametros_variaveis} 		=	{varios}virgula{->New parametros_variaveis.varios(virgula)}|
+															{unico}tipo identificador{->New parametros_variaveis.unico(tipo,identificador)};
 					
 Abstract Syntax Tree
 	programa 					=	declaracao*;
 	declaracao 					=	declaracao_variavel|
 									{funcao}declaracao_funcao;
 	declaracao_variavel 		=	[a]:tipo [asd]:identificador;
-	declaracao_funcao			=	tipo identificador;
+	declaracao_funcao			=	tipo identificador parametros_variaveis*;
+	parametros_variaveis		=	{unico}tipo identificador|
+									{varios}virgula;
 	tipo 						= 	{inteiro} int|
 									{flutuante}float|
 									{void}void|
