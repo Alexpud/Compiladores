@@ -30,9 +30,11 @@ Tokens
 	{normal}switch 							= 'switch';
 
 	//Operadores e atribuicao
-	{normal}op  		 					= ('+' | '-')sp*;
-	{normal}multiplicacao 					= '*'  sp*;
-	{normal}divisao  						=  '\' sp*;
+	{normal}mais  		 					= '+' sp*;
+	{normal}sub								= '-' sp*;
+	{normal}mult							= '*' sp*;
+	{normal}div  							=  '\' sp*;
+	{normal}mod								= '%' sp*;
 	{normal}attr 							= '=' sp*;
 	{normal}incremento						= '++';
 	{normal}decremento						= '--';
@@ -65,6 +67,8 @@ Tokens
 
 
 	//Pontuacao
+	{normal}colchete_e						= '[';
+	{normal}colchete_d						= ']';
 	{normal}chave_e 						= '{';
 	{normal}chave_d 						= '}';
 	{normal}parenteses_e 					= '(';
