@@ -123,7 +123,7 @@ Productions
 														{criacao_atribuicao}tipo identificador attr valores semi{->New declaracao_variavel.criacao_atribuicao(tipo,identificador,valores.valores)};
 	
 	declaracao_funcao{->declaracao_funcao}			=	tipo identificador parenteses_e parametros parenteses_d corpo{-> New declaracao_funcao(tipo,identificador,[parametros.parametros_variaveis],[corpo.bloco])}|
-														{chamada}identificador parenteses_e parametros parenteses_d{-> New declaracao_funcao.chamada(identificador,[parametros.parametros_variaveis])};
+														{chamada}identificador parenteses_e parametros parenteses_d semi{-> New declaracao_funcao.chamada(identificador,[parametros.parametros_variaveis])};
 	
 	tipo{->tipo}									= 	tipo_base				{-> tipo_base.tipo}|
 														{void}void				{-> New tipo.void(void)};
