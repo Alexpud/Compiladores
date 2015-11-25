@@ -30,11 +30,9 @@ Tokens
 	{normal}switch 							= 'switch';
 
 	//Operadores e atribuicao
-	{normal}mais  		 					= '+' sp*;
-	{normal}menos							= '-' sp*;
-	{normal}multiplicacao					= '*' sp*;
-	{normal}div  							=  '\' sp*;
-	{normal}mod								= '%' sp*;
+	{normal}op  		 					= ('+' | '-')sp*;
+	{normal}multiplicacao 					= '*'  sp*;
+	{normal}divisao  						=  '\' sp*;
 	{normal}attr 							= '=' sp*;
 	{normal}incremento						= '++';
 	{normal}decremento						= '--';
@@ -63,13 +61,10 @@ Tokens
 	{normal}num_int 						= ('0x')?digit+ sp*;
 	{normal}caractere_char 					= apostrofo caractere apostrofo sp*;
 	{normal}float_number 					= digit+ '.'(digit+|'e'('+'|'-')digit+) sp*;
-	{normal} id       = caractere (caractere | digit | '_')*;   
 
 
 
 	//Pontuacao
-	{normal}colchete_e						= '[';
-	{normal}colchete_d						= ']';
 	{normal}chave_e 						= '{';
 	{normal}chave_d 						= '}';
 	{normal}parenteses_e 					= '(';
@@ -122,9 +117,6 @@ Productions
 	
 	declaracao{->declaracao}						= 	declaracao_variavel{-> New declaracao(declaracao_variavel)}|
 														{funcao}declaracao_funcao{-> New declaracao.funcao(declaracao_funcao)};
-														
-	var {-> var} = {var} id {-> New var.var(id)}
- 			   | {var_array} array {-> New var.var_array(array)};
 	
 	declaracao_variavel{->declaracao_variavel}		= 	tipo identificador semi {-> New declaracao_variavel(tipo.tipo , identificador )}|
 														{atribuicao} identificador attr valores semi{-> New declaracao_variavel.atribuicao(identificador,valores.valores)}|
@@ -155,30 +147,7 @@ Productions
 	
 	bloco{->bloco}									=	declaracao_variavel{-> New bloco(declaracao_variavel)}|
 														{funcao}declaracao_funcao{-> New bloco.funcao(declaracao_funcao)};
-															
-	//Exp_matematica
-	
-	expressoes = {exp_math} mat;
-	
-	mat {-> mat} = {m_to} mult {-> New mat.m_to(mult.mat)}
-	    | {m_sub} mat menos mult {-> New mat.m_sub(mat, mult.mat)}
-	    | {m_add} mat mais mult {-> New mat.m_add(mat, mult.mat)};
-	
-	mult {-> mat }= {mult_to} mat_unary {-> New mat.mult_to(mat_unary.mat)}
-	     | {mult_op2} mult div mat_unary {-> New mat.mult_op2(mult.mat, mat_unary.mat)} 
-	     | {mult_op3} mult mod mat_unary {-> New mat.mult_op3(mult.mat, mat_unary.mat)}
-	     | {mult_op1} mult multiplicacao mat_unary {-> New mat.mult_op1(mult.mat, mat_unary.mat)}; 
-	     
-	mat_unary {-> mat} = {mat_unaria} menos mat_term {-> New mat.mat_unaria(mat_term.mat)} 
-	    |{mat_term} mat_term {-> New mat.mat_term(mat_term.mat)};     
-		
-	
-	mat_term {-> mat} =  {mat_term_nova_exp} parenteses_e mat parenteses_d {-> New mat.mat_term_nova_exp(mat)}
-	         | {mat_term_var} fator {-> New mat.mat_term_var(fator)};
-	         
-	fator = {fator_var} var
-	    | {fator_valor} tipo;
-	
+
 	
 Abstract Syntax Tree
 	
@@ -186,9 +155,6 @@ Abstract Syntax Tree
 	
 	declaracao 										=	declaracao_variavel|
 														{funcao}declaracao_funcao;
-														
-	var = {var} id
- 		|{var_array} array;
 														
 	declaracao_variavel 							=	tipo identificador|
 														{atribuicao}identificador valores|
@@ -211,24 +177,5 @@ Abstract Syntax Tree
 														{flutuante}float|
 														{void}void|
 														{caractere} char;
-														
-	expressoes = {exp_math} mat;
 	
-	mat = {m_to} mat
-        | {m_sub} [l]:mat [r]:mat 
-        | {m_add} [l]:mat [r]:mat
-
-	    | {mult_to} mat	    
-	    | {mult_op2} [l]:mat [r]:mat 
-        | {mult_op3} [l]:mat [r]:mat 
-	    | {mult_op1} [l]:mat [r]:mat
-	    
-	    | {mat_unaria} mat
-	    | {mat_term} mat
-	    
-        | {mat_term_nova_exp} mat
-        | {mat_term_var} fator;
-	
-	fator = {fator_var} var
-	    | {fator_valor} tipo;
 	
