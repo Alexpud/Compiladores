@@ -30,7 +30,8 @@ Tokens
 	{normal}switch 							= 'switch';
 
 	//Operadores e atribuicao
-	{normal}op  		 					= ('+' | '-')sp*;
+	{normal}soma							= '+' sp*;
+	{normal}menos							= '-' sp*;
 	{normal}multiplicacao 					= '*'  sp*;
 	{normal}divisao  						=  '\' sp*;
 	{normal}attr 							= '=' sp*;
@@ -119,11 +120,27 @@ Productions
 														{funcao}declaracao_funcao{-> New declaracao.funcao(declaracao_funcao)};
 	
 	declaracao_variavel{->declaracao_variavel}		= 	tipo identificador semi {-> New declaracao_variavel(tipo.tipo , identificador )}|
-														{atribuicao} identificador attr valores semi{-> New declaracao_variavel.atribuicao(identificador,valores.valores)}|
-														{criacao_atribuicao}tipo identificador attr valores semi{->New declaracao_variavel.criacao_atribuicao(tipo,identificador,valores.valores)};
+														{atribuicao} identificador attr expr semi{-> New declaracao_variavel.atribuicao(identificador,expr.expr)}|
+														{criacao_atribuicao}tipo identificador attr valores semi{->New declaracao_variavel.criacao_atribuicao(tipo,identificador,valores)};
+														
+	/*operacao_aritmetica{->operacao_aritmetica} 		=	{soma} valores op operacao_aritmetica{->New operacao_aritmetica.soma(left.operacao_aritmetica,right.operacao_aritmetica)}|					
+														{valor}valores{->New operacao_aritmetica.valor(valores)};*/
+														
+	expr {-> expr}									=	{factor} factor  {-> factor.expr} 
+														|{plus} [left]:expr soma [right]:factor   {-> New expr.plus(left.expr, right.expr)} 
+														|{minus} [left]:expr menos [right]:factor {-> New expr.minus(left.expr, right.expr)};
+
+	factor {-> expr} 								=  	{term} term  {-> term.expr} |
+														{mult} [left]:factor multiplicacao [right]:term   {-> New expr.mult(left.expr, right.expr)} |
+														{div} [left]:factor divisao [right]:term     {-> New expr.div(left.expr, right.expr)};
+
+	term {-> expr} 									=	{number} valores{-> New expr.number(valores)} |
+														{expr} parenteses_e expr parenteses_d	{-> expr.expr};
 	
-	declaracao_funcao{->declaracao_funcao}			=	tipo identificador parenteses_e parametros parenteses_d corpo{-> New declaracao_funcao(tipo,identificador,[parametros.parametros_variaveis],[corpo.bloco])}|
-														{chamada}identificador parenteses_e parametros parenteses_d semi{-> New declaracao_funcao.chamada(identificador,[parametros.parametros_variaveis])};
+	declaracao_funcao{->declaracao_funcao}			=	tipo identificador parenteses_e parametros parenteses_d corpo{-> New declaracao_funcao(tipo,identificador,[parametros.parametros_variaveis],[corpo.bloco])};
+														
+	
+	chamada_funcao{->chamada_funcao}				=	identificador parenteses_e parametros parenteses_d semi{-> New chamada_funcao(identificador,[parametros.parametros_variaveis])};
 	
 	tipo{->tipo}									= 	tipo_base				{-> tipo_base.tipo}|
 														{void}void				{-> New tipo.void(void)};
@@ -146,9 +163,13 @@ Productions
 	corpo{->bloco*} 	    							= 	chave_e bloco* chave_d{-> [bloco.bloco]};
 	
 	bloco{->bloco}									=	declaracao_variavel{-> New bloco(declaracao_variavel)}|
-														{funcao}declaracao_funcao{-> New bloco.funcao(declaracao_funcao)};
-
+														{funcao}chamada_funcao{-> New bloco.funcao(chamada_funcao)}|
+														{exps}return expressao{->New bloco.exps(expressao)};
 	
+	expressao{->expressao}							=	valores semi{->New expressao(valores)}|
+														{exp}parenteses_e expressao parenteses_d semi{->New expressao.exp(expressao.expressao)}|
+														{chamada}chamada_funcao{->New expressao.chamada(chamada_funcao)};
+														
 Abstract Syntax Tree
 	
 	programa 										=	declaracao*;
@@ -157,18 +178,34 @@ Abstract Syntax Tree
 														{funcao}declaracao_funcao;
 														
 	declaracao_variavel 							=	tipo identificador|
-														{atribuicao}identificador valores|
+														{atribuicao}identificador expr|
 														{criacao_atribuicao}tipo identificador valores;
+														
+	expr 											= 	{plus} [left]:expr [right]:expr| 
+														{minus} [left]:expr [right]:expr| 
+														{mult} [left]:expr [right]:expr| 
+														{div} [left]:expr [right]:expr| 
+														{mod} [left]:expr [right]:expr| 
+														{number} valores;
+														
+	/*operacao_aritmetica								=	{soma}[left]:operacao_aritmetica [right]:operacao_aritmetica|
+														{valor}valores;*/
 	
 	valores											=	{numerointeiro}num_int|
 														{caractere}caractere_char|
 														{numerofloat}float_number;
 	
-	declaracao_funcao								=	tipo identificador parametros_variaveis* bloco*|
-														{chamada}identificador parametros_variaveis*;
+	declaracao_funcao								=	tipo identificador parametros_variaveis* bloco*;
 	
 	bloco											=	declaracao_variavel|
-														{funcao}declaracao_funcao;
+														{funcao}chamada_funcao|
+														{exps}expressao;
+														
+	expressao										=	valores|
+														{exp}expressao|
+														{chamada}chamada_funcao;
+														
+	chamada_funcao									=	identificador parametros_variaveis*;
 	
 	parametros_variaveis							=	{unico}tipo identificador|
 														{varios}virgula;
