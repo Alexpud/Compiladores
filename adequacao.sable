@@ -155,6 +155,7 @@ Abstract Syntax Tree
 	
 	declaracao 										=	declaracao_variavel|
 														{funcao}declaracao_funcao;
+														
 	declaracao_variavel 							=	tipo identificador|
 														{atribuicao}identificador valores|
 														{criacao_atribuicao}tipo identificador valores;
