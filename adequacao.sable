@@ -63,6 +63,7 @@ Tokens
 	{normal}num_int 						= ('0x')?digit+ sp*;
 	{normal}caractere_char 					= apostrofo caractere apostrofo sp*;
 	{normal}float_number 					= digit+ '.'(digit+|'e'('+'|'-')digit+) sp*;
+	{normal}string   						= '"' [all - [[10 + 13] + '"']]* '"';
 
 
 
