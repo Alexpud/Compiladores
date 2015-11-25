@@ -122,33 +122,37 @@ Productions
 														{atribuicao} identificador attr valores semi{-> New declaracao_variavel.atribuicao(identificador,valores.valores)}|
 														{criacao_atribuicao}tipo identificador attr valores semi{->New declaracao_variavel.criacao_atribuicao(tipo,identificador,valores.valores)};
 	
-	declaracao_funcao{->declaracao_funcao}			=	tipo identificador parenteses_e parametros parenteses_d{-> New declaracao_funcao(tipo,identificador,[parametros.parametros_variaveis])};
+	declaracao_funcao{->declaracao_funcao}			=	tipo identificador parenteses_e parametros parenteses_d corpo{-> New declaracao_funcao(tipo,identificador,[parametros.parametros_variaveis],corpo)};
 	
-	tipo{->tipo}									= 	tipo_base{-> tipo_base.tipo}|
-														{void}void{-> New tipo.void(void)};
+	tipo{->tipo}									= 	tipo_base				{-> tipo_base.tipo}|
+														{void}void				{-> New tipo.void(void)};
 	
-	tipo_base{->tipo} 								=	{inteiro} int {-> New tipo.inteiro(int)}|
-														{flutuante}float {->New tipo.flutuante(float)}|
-														{caractere} char {->New tipo.caractere(char)};
+	tipo_base{->tipo} 								=	{inteiro} int 			{-> New tipo.inteiro(int)}|
+														{flutuante}float 		{->New tipo.flutuante(float)}|
+														{caractere} char 		{->New tipo.caractere(char)};
 	
 	valores{->valores}      						=  	tipo_base_valores{->tipo_base_valores.valores};
 					
-	tipo_base_valores{->valores}					= 	{numerointeiro}num_int{->    New valores.numerointeiro(num_int)}|
+	tipo_base_valores{->valores}					= 	{numerointeiro}num_int   {-> New valores.numerointeiro(num_int)}|
 														{caractere}caractere_char{-> New valores.caractere(caractere_char)}|
-														{numerofloat}float_number{->New valores.numerofloat(float_number)};
+														{numerofloat}float_number{-> New valores.numerofloat(float_number)};
 									
 	parametros{->parametros_variaveis*}				=	parametros_variaveis*{->[parametros_variaveis.parametros_variaveis]};
 	
 	parametros_variaveis{->parametros_variaveis} 	=	{varios}virgula{->New parametros_variaveis.varios(virgula)}|
 														{unico}tipo identificador{->New parametros_variaveis.unico(tipo,identificador)};
-					
+	
+	corpo{->corpo} 	    	= 	chave_e bloco chave_d{-> bloco.corpo};
+	
+	bloco{->corpo}			=	identificador{-> New corpo(identificador)};
+	
 Abstract Syntax Tree
 	
 	programa 										=	declaracao*;
 	
 	declaracao 										=	declaracao_variavel|
 														{funcao}declaracao_funcao;
-	declaracao_variavel 							=	[a]:tipo [asd]:identificador|
+	declaracao_variavel 							=	tipo identificador|
 														{atribuicao}identificador valores|
 														{criacao_atribuicao}tipo identificador valores;
 	
@@ -156,7 +160,9 @@ Abstract Syntax Tree
 														{caractere}caractere_char|
 														{numerofloat}float_number;
 	
-	declaracao_funcao								=	tipo identificador parametros_variaveis*;
+	declaracao_funcao								=	tipo identificador parametros_variaveis* corpo;
+	
+	corpo											=	identificador;
 	
 	parametros_variaveis							=	{unico}tipo identificador|
 														{varios}virgula;
@@ -165,4 +171,5 @@ Abstract Syntax Tree
 														{flutuante}float|
 														{void}void|
 														{caractere} char;
-					
+	
+	
