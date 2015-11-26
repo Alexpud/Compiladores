@@ -62,7 +62,7 @@ Tokens
 	{normal}num_int 						= ('0x')?digit+ sp*;
 	{normal}caractere_char 					= apostrofo caractere apostrofo sp*;
 	{normal}float_number 					= digit+ '.'(digit+|'e'('+'|'-')digit+) sp*;
-
+	{normal} string   						= '"' [all - [[10 + 13] + '"']]* '"';
 
 
 	//Pontuacao
@@ -147,7 +147,8 @@ Productions
 	
 	tipo_base{->tipo} 								=	{inteiro} int 			{-> New tipo.inteiro(int)}|
 														{flutuante}float 		{->New tipo.flutuante(float)}|
-														{caractere} char 		{->New tipo.caractere(char)};
+														{caractere} char 		{->New tipo.caractere(char)}|
+														{string} string			{->New tipo.string(string)};
 	
 	valores{->valores}      						=  	tipo_base_valores{->tipo_base_valores.valores};
 					
@@ -213,6 +214,7 @@ Abstract Syntax Tree
 	tipo 											= 	{inteiro} int|
 														{flutuante}float|
 														{void}void|
-														{caractere} char;
+														{caractere} char|
+														{string} string;
 	
 	
