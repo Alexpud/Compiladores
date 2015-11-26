@@ -178,6 +178,7 @@ Productions
 														{atribuicao}atribuicao_variavel semi{->New bloco.atribuicao(atribuicao_variavel)}|
 														{funcao}chamada_funcao{-> New bloco.funcao(chamada_funcao)}|
 														{repeticao}laco{->New bloco.repeticao(laco)}|
+														{condicional}condicional{->New bloco.condicional(condicional)}|
 														{exps}return expressao{->New bloco.exps(expressao)};
 	
 	expressao{->expressao}							=	valores {->New expressao(valores)}|
@@ -196,6 +197,11 @@ Productions
 														
 	
 	condicao_foreach{->condicao_foreach}			=	{unico}declaracao_variavel dois_pontos identificador {->New condicao_foreach.unico(declaracao_variavel,identificador)};
+	
+	condicional{-> condicional} = {if} if parenteses_e expressao parenteses_d corpo {->New condicional.if( expressao, [corpo.bloco])}
+								  |{if_else} if parenteses_e expressao parenteses_d [first]:corpo else [second]:corpo {->New condicional.if_else(expressao, [first.bloco], [second.bloco])};
+								  
+	
 														
 Abstract Syntax Tree
 	
@@ -232,6 +238,7 @@ Abstract Syntax Tree
 														{atribuicao}atribuicao_variavel|
 														{funcao}chamada_funcao|
 														{repeticao}laco|
+														{condicional}condicional|
 														{exps}expressao;
 	atribuicao_variavel								=	identificador expressao;
 
@@ -262,4 +269,6 @@ Abstract Syntax Tree
 														{void}void|
 														{caractere} char;
 	
+	condicional = {if} expressao bloco*
+				  ||{if_else} expressao [first]:bloco* [second]:bloco*;
 	
