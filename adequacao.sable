@@ -125,7 +125,7 @@ Productions
 														{array}tipo colchete_e colchete_d lista_variaveis{-> New declaracao_variavel.array(tipo,[lista_variaveis.lista_variavel])}|
 														{criacao_atribuicao}tipo identificador attr valores {->New declaracao_variavel.criacao_atribuicao(tipo,identificador,valores)};
 														
-	atribuicao_variavel{->atribuicao_variavel}		=	identificador attr expressao{-> New atribuicao_variavel(identificador,expressao.expressao)};
+	atribuicao_variavel{->atribuicao_variavel}		=	identificador attr expr{-> New atribuicao_variavel(identificador,expr)};
 	
 	lista_atribuicao_variavel{->lista_atribuicao_variavel}	=	lista_variaveis attr expressao{->New lista_atribuicao_variavel([lista_variaveis.lista_variavel],expressao)};
 	
@@ -178,14 +178,17 @@ Productions
 														{atribuicao}atribuicao_variavel semi{->New bloco.atribuicao(atribuicao_variavel)}|
 														{funcao}chamada_funcao{-> New bloco.funcao(chamada_funcao)}|
 														{repeticao}laco{->New bloco.repeticao(laco)}|
-														{condicional}condicional{->New bloco.condicional(condicional)}|
 														{exps}return expressao{->New bloco.exps(expressao)};
 	
 	expressao{->expressao}							=	valores {->New expressao(valores)}|
 														{exp}parenteses_e expressao parenteses_d{->New expressao.exp(expressao.expressao)}|
 														{menor}identificador menor expressao{->New expressao.menor(identificador,expressao)}|
 														{maior}identificador maior expressao{->New expressao.maior(identificador,expressao)}|
+														{menor_igual}identificador menor_igual expressao{-> New expressao.menor_igual(identificador,expressao)}|
+														{maior_igual}identificador maior_igual expressao{-> New expressao.maior_igual(identificador,expressao)}|
+														{igual}identificador equal expressao{-> New expressao.igual(identificador,expressao)}|
 														{inc} incremento{->New expressao.inc(incremento)}|
+														{dec}decremento{->New expressao.dec(decremento)}|
 														{chamada}chamada_funcao{->New expressao.chamada(chamada_funcao)};
 														
 	laco{->laco} 									= 	{for}  for parenteses_e condicao_for parenteses_d corpo				{-> New laco.for(condicao_for, [corpo.bloco])}|
@@ -197,11 +200,6 @@ Productions
 														
 	
 	condicao_foreach{->condicao_foreach}			=	{unico}declaracao_variavel dois_pontos identificador {->New condicao_foreach.unico(declaracao_variavel,identificador)};
-	
-	condicional{-> condicional} = {if} if parenteses_e expressao parenteses_d corpo {->New condicional.if( expressao, [corpo.bloco])}
-								  |{if_else} if parenteses_e expressao parenteses_d [first]:corpo else [second]:corpo {->New condicional.if_else(expressao, [first.bloco], [second.bloco])};
-								  
-	
 														
 Abstract Syntax Tree
 	
@@ -238,9 +236,8 @@ Abstract Syntax Tree
 														{atribuicao}atribuicao_variavel|
 														{funcao}chamada_funcao|
 														{repeticao}laco|
-														{condicional}condicional|
 														{exps}expressao;
-	atribuicao_variavel								=	identificador expressao;
+	atribuicao_variavel								=	identificador expr;
 
 	laco											=	{for} condicao_for bloco*|
 														{foreach}condicao_foreach bloco*|
@@ -256,7 +253,11 @@ Abstract Syntax Tree
 														{exp}expressao|
 														{menor} identificador expressao|
 														{maior} identificador expressao|
+														{menor_igual}identificador expressao|
+														{maior_igual}identificador expressao|
+														{igual}identificador expressao|
 														{inc}incremento|
+														{dec}decremento|
 														{chamada}chamada_funcao;
 														
 	chamada_funcao									=	identificador parametros_variaveis*;
@@ -269,6 +270,4 @@ Abstract Syntax Tree
 														{void}void|
 														{caractere} char;
 	
-	condicional = {if} expressao bloco*
-				  ||{if_else} expressao [first]:bloco* [second]:bloco*;
 	
