@@ -1,4 +1,4 @@
-﻿Helpers
+Helpers
 	all = [0 .. 0xFFFF];
     	digit = ['0' .. '9'] ;
     	hex = [0..0x0fff];
@@ -175,7 +175,7 @@ Productions
 	corpo{->bloco*} 	    							= 	chave_e bloco* chave_d{-> [bloco.bloco]};
 	
 	bloco{->bloco}									=	declaracao_variavel semi{-> New bloco(declaracao_variavel)}|
-														{atribuicao}atribuicao_variavel{->New bloco.atribuicao(atribuicao_variavel)}|
+														{atribuicao}atribuicao_variavel semi{->New bloco.atribuicao(atribuicao_variavel)}|
 														{funcao}chamada_funcao{-> New bloco.funcao(chamada_funcao)}|
 														{repeticao}laco{->New bloco.repeticao(laco)}|
 														{exps}return expressao{->New bloco.exps(expressao)};
