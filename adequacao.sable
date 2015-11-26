@@ -62,14 +62,16 @@ Tokens
 	{normal}num_int 						= ('0x')?digit+ sp*;
 	{normal}caractere_char 					= apostrofo caractere apostrofo sp*;
 	{normal}float_number 					= digit+ '.'(digit+|'e'('+'|'-')digit+) sp*;
-	{normal} string   						= '"' [all - [[10 + 13] + '"']]* '"';
+
 
 
 	//Pontuacao
 	{normal}chave_e 						= '{';
 	{normal}chave_d 						= '}';
-	{normal}parenteses_e 					= '(';
-	{normal}parenteses_d 					= ')';
+	{normal}parenteses_e 					= '(' sp*;
+	{normal}colchete_e						= '[' sp*;
+	{normal}colchete_d						= ']' sp*;
+	{normal}parenteses_d 					= ')' sp*;
 	{normal}semi							= ';' lf?;
 	{normal}virgula 							= ',';
 	{normal}dois_pontos						= ':' sp*;
@@ -116,21 +118,19 @@ Productions
 	
 	declaracoes{->declaracao*} 						=	declaracao*{->[declaracao.declaracao]};
 	
-	declaracao{->declaracao}						= 	declaracao_variavel{-> New declaracao(declaracao_variavel)}|
+	declaracao{->declaracao}						= 	declaracao_variavel semi{-> New declaracao(declaracao_variavel)}|
 														{funcao}declaracao_funcao{-> New declaracao.funcao(declaracao_funcao)};
 	
-	declaracao_variavel{->declaracao_variavel}		= 	tipo lista_variaveis semi {-> New declaracao_variavel([lista_variaveis.lista_variavel])}|
-														{atribuicao} identificador attr expr semi{-> New declaracao_variavel.atribuicao(identificador,expr.expr)}|
-														{criacao_atribuicao}tipo identificador attr valores semi{->New declaracao_variavel.criacao_atribuicao(tipo,identificador,valores)};
-<<<<<<< HEAD
+	declaracao_variavel{->declaracao_variavel}		= 	tipo lista_variaveis  {-> New declaracao_variavel([lista_variaveis.lista_variavel])}|
+														{array}tipo colchete_e colchete_d lista_variaveis{-> New declaracao_variavel.array(tipo,[lista_variaveis.lista_variavel])}|
+														{criacao_atribuicao}tipo identificador attr valores {->New declaracao_variavel.criacao_atribuicao(tipo,identificador,valores)};
+														
+	atribuicao_variavel{->atribuicao_variavel}		=	identificador attr expressao{-> New atribuicao_variavel(identificador,expressao.expressao)};
+	
+	lista_atribuicao_variavel{->lista_atribuicao_variavel}	=	lista_variaveis attr expressao{->New lista_atribuicao_variavel([lista_variaveis.lista_variavel],expressao)};
 	
 	lista_variaveis{->lista_variavel*}				=	lista_variavel*{->[lista_variavel.lista_variavel]};
 	
-=======
-	
-	lista_variaveis{->lista_variavel*}				=	lista_variavel*{->[lista_variavel.lista_variavel]};
-	
->>>>>>> origin/master
 	lista_variavel{->lista_variavel}			= 		{varios}identificador virgula lista_variavel{->New lista_variavel.varios(identificador,lista_variavel)}|
 														{unico}identificador{->New lista_variavel.unico(identificador)};
 														
@@ -158,10 +158,10 @@ Productions
 	
 	tipo_base{->tipo} 								=	{inteiro} int 			{-> New tipo.inteiro(int)}|
 														{flutuante}float 		{->New tipo.flutuante(float)}|
-														{caractere} char 		{->New tipo.caractere(char)}|
-														{string} string			{->New tipo.string(string)};
+														{caractere} char 		{->New tipo.caractere(char)};
 	
-	valores{->valores}      						=  	tipo_base_valores{->tipo_base_valores.valores};
+	valores{->valores}      						=  	tipo_base_valores{->tipo_base_valores.valores}|
+														{id}identificador{->New valores.id(identificador)};
 					
 	tipo_base_valores{->valores}					= 	{numerointeiro}num_int   {-> New valores.numerointeiro(num_int)}|
 														{caractere}caractere_char{-> New valores.caractere(caractere_char)}|
@@ -174,30 +174,28 @@ Productions
 	
 	corpo{->bloco*} 	    							= 	chave_e bloco* chave_d{-> [bloco.bloco]};
 	
-	bloco{->bloco}									=	declaracao_variavel{-> New bloco(declaracao_variavel)}|
+	bloco{->bloco}									=	declaracao_variavel semi{-> New bloco(declaracao_variavel)}|
+														{atribuicao}atribuicao_variavel{->New bloco.atribuicao(atribuicao_variavel)}|
 														{funcao}chamada_funcao{-> New bloco.funcao(chamada_funcao)}|
 														{repeticao}laco{->New bloco.repeticao(laco)}|
 														{exps}return expressao{->New bloco.exps(expressao)};
 	
-	expressao{->expressao}							=	valores semi{->New expressao(valores)}|
-														{exp}parenteses_e expressao parenteses_d semi{->New expressao.exp(expressao.expressao)}|
+	expressao{->expressao}							=	valores {->New expressao(valores)}|
+														{exp}parenteses_e expressao parenteses_d{->New expressao.exp(expressao.expressao)}|
 														{menor}identificador menor expressao{->New expressao.menor(identificador,expressao)}|
+														{maior}identificador maior expressao{->New expressao.maior(identificador,expressao)}|
+														{inc} incremento{->New expressao.inc(incremento)}|
 														{chamada}chamada_funcao{->New expressao.chamada(chamada_funcao)};
 														
-<<<<<<< HEAD
-	laco{->laco} 									= 	{for}  for parenteses_e condicao_for parenteses_d corpo{-> New laco.for(condicao_for, [corpo.bloco])}|
-														{foreach}foreach parenteses_e condicao_foreach parenteses_d corpo{-> New laco.foreach(condicao_foreach, [corpo.bloco])};
+	laco{->laco} 									= 	{for}  for parenteses_e condicao_for parenteses_d corpo				{-> New laco.for(condicao_for, [corpo.bloco])}|
+														{foreach}foreach parenteses_e condicao_foreach parenteses_d corpo{-> New laco.foreach(condicao_foreach, [corpo.bloco])}|
+														{while} while parenteses_e expressao parenteses_d corpo{-> New laco.while(expressao, [corpo.bloco])};
+														
 			
-	condicao_for{->condicao_for} 					= 	{incremento}declaracao_variavel expressao identificador incremento{->New condicao_for.incremento(declaracao_variavel,expressao,incremento)}|
-														{decremento}declaracao_variavel menor semi identificador decremento{->New condicao_for.decremento(declaracao_variavel,menor,identificador,decremento)};
+	condicao_for{->condicao_for} 					= 	{incremento}[left]:lista_atribuicao_variavel [lefft]:semi expressao [lft]:semi [right]:lista_atribuicao_variavel{->New condicao_for.incremento(left.lista_atribuicao_variavel,expressao,right.lista_atribuicao_variavel)};
+														
 	
-	condicao_foreach{->condicao_foreach}			=	tipo identificador dois_pontos [lol]:identificador{->New condicao_foreach(tipo,identificador,lol.identificador)};
-=======
-	laco{->laco} 									= 	{for}  for parenteses_e condicao_for parenteses_d corpo{-> New laco.for(condicao_for, [corpo.bloco])};
-			
-	condicao_for{->condicao_for} 					= 	{incremento}declaracao_variavel expressao identificador incremento{->New condicao_for.incremento(declaracao_variavel,expressao,incremento)}|
-														{decremento}declaracao_variavel menor semi identificador decremento{->New condicao_for.decremento(declaracao_variavel,menor,identificador,decremento)};
->>>>>>> origin/master
+	condicao_foreach{->condicao_foreach}			=	{unico}declaracao_variavel dois_pontos identificador {->New condicao_foreach.unico(declaracao_variavel,identificador)};
 														
 Abstract Syntax Tree
 	
@@ -207,10 +205,10 @@ Abstract Syntax Tree
 														{funcao}declaracao_funcao;
 														
 	declaracao_variavel 							=	lista_variavel*|
-														{atribuicao}identificador expr|
+														{array}tipo lista_variavel*|
 														{criacao_atribuicao}tipo identificador valores;
 														
-	lista_variavel								=		{varios}identificador lista_variavel|	
+	lista_variavel									=	{varios}identificador lista_variavel|	
 														{unico}identificador;
 														
 	expr 											= 	{plus} [left]:expr [right]:expr| 
@@ -223,32 +221,35 @@ Abstract Syntax Tree
 	/*operacao_aritmetica								=	{soma}[left]:operacao_aritmetica [right]:operacao_aritmetica|
 														{valor}valores;*/
 	
-	valores											=	{numerointeiro}num_int|
+	valores											=	{id}identificador|
+														{numerointeiro}num_int|
 														{caractere}caractere_char|
 														{numerofloat}float_number;
 	
 	declaracao_funcao								=	tipo identificador parametros_variaveis* bloco*;
 	
 	bloco											=	declaracao_variavel|
+														{atribuicao}atribuicao_variavel|
 														{funcao}chamada_funcao|
 														{repeticao}laco|
 														{exps}expressao;
-	
-<<<<<<< HEAD
+	atribuicao_variavel								=	identificador expressao;
+
 	laco											=	{for} condicao_for bloco*|
-														{foreach}condicao_foreach bloco*;
+														{foreach}condicao_foreach bloco*|
+														{while} expressao bloco*;
 														
-	condicao_foreach								=	tipo [left]:identificador [lol]:identificador;
-=======
-	laco											=	{for} condicao_for bloco*;
->>>>>>> origin/master
+	condicao_foreach								=	{unico}declaracao_variavel identificador;
 	
-	condicao_for									=	{incremento}declaracao_variavel expressao incremento|
-														{decremento}declaracao_variavel menor identificador decremento;
+	condicao_for									=	{incremento}[left]:lista_atribuicao_variavel expressao [right]:lista_atribuicao_variavel;
+														
+	lista_atribuicao_variavel						=	lista_variavel* expressao;
 														
 	expressao										=	valores|
 														{exp}expressao|
 														{menor} identificador expressao|
+														{maior} identificador expressao|
+														{inc}incremento|
 														{chamada}chamada_funcao;
 														
 	chamada_funcao									=	identificador parametros_variaveis*;
@@ -259,7 +260,6 @@ Abstract Syntax Tree
 	tipo 											= 	{inteiro} int|
 														{flutuante}float|
 														{void}void|
-														{caractere} char|
-														{string} string;
+														{caractere} char;
 	
 	

@@ -1,4 +1,4 @@
-Helpers
+﻿Helpers
 	all = [0 .. 0xFFFF];
     	digit = ['0' .. '9'] ;
     	hex = [0..0x0fff];
@@ -129,7 +129,6 @@ Productions
 	 logo fatorei como tinha na prova, para tirar ambiguidade e ficar mais bonito.
 	*/	
 	
-<<<<<<< HEAD
 	tipo_base 	     = {inteiro} int |
 					   {charizard} char | 
 			           {floatomon} float;
@@ -141,18 +140,6 @@ Productions
 	
 	parametros_variaveis	 = 	{varios}tipo identificador virgula|
 								{unico}tipo identificador;
-=======
-	decl = {variavel}semi | {funcao}parametros body;
-
-	tipo 	     = {inteiro} int |
-			       {charizard} char | 
-			       {floatomon} float;
-
-	parametros   = parenteses_e parametros_variaveis* parenteses_d;
-	
-	parametros_variaveis	 = 	tipo identificador comma|
-					{more10one}tipo identificador;
->>>>>>> origin/master
 
 	corpo 	     = 	chave_e bloco;
 	
@@ -166,7 +153,6 @@ Productions
 					
 					
     
-<<<<<<< HEAD
     operacao_aritmetica 	 =	valores operadores operacao_aritmetica|
     				{valor}valores;
     /*parenteses_e operacao_aritmetica parenteses_d|
@@ -175,10 +161,6 @@ Productions
     							{valor}valores ;*/
     							
  	
-=======
-    	operacao 	 =	valores operadores operacao|
-    				{valor}valores;
->>>>>>> origin/master
 	
 	operadores	= 	op|
 					{mul}multiplicacao|
@@ -205,21 +187,12 @@ Productions
 	caso = valores dois_pontos bloco_switch;
 	
 	bloco_switch = 	case caso|
-<<<<<<< HEAD
 					{declaracao}declaracao bloco_switch|
 					{chamadafuncao}identificador parametros bloco_switch|
 					{condicional}condicional bloco_switch|
 					{retorno}return identificador semi bloco_switch|
 					{laco}laco bloco_switch|
 					{chave_d}chave_d semi;
-=======
-					{opt1}declaracao bloco_switch|
-					{opt2}identificador parametros bloco_switch|
-					{opt3}condicional bloco_switch|
-					{opt4}return identificador semi bloco_switch|
-					{opt5}laco bloco_switch|
-					{opt6}chave_d semi;
->>>>>>> origin/master
 					
 	condicao	 =	identificador|
 					{unica}identificador sinais valores|

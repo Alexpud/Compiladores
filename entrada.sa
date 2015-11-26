@@ -1,2 +1,14 @@
-
-int a; 
+int a;
+int a;
+int a()
+{
+	int a = 4;
+	for(a = 0;(a < (a));a=++)
+	{
+		a();
+	}
+	for each(int b : a )
+	{
+	}
+	b();
+}
