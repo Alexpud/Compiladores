@@ -62,7 +62,7 @@ Tokens
 	{normal}num_int 						= ('0x')?digit+ sp*;
 	{normal}caractere_char 					= apostrofo caractere apostrofo sp*;
 	{normal}float_number 					= digit+ '.'(digit+|'e'('+'|'-')digit+) sp*;
-
+	{normal} string   						= '"' [all - [[10 + 13] + '"']]* '"';
 
 
 	//Pontuacao
@@ -122,9 +122,15 @@ Productions
 	declaracao_variavel{->declaracao_variavel}		= 	tipo lista_variaveis semi {-> New declaracao_variavel([lista_variaveis.lista_variavel])}|
 														{atribuicao} identificador attr expr semi{-> New declaracao_variavel.atribuicao(identificador,expr.expr)}|
 														{criacao_atribuicao}tipo identificador attr valores semi{->New declaracao_variavel.criacao_atribuicao(tipo,identificador,valores)};
+<<<<<<< HEAD
 	
 	lista_variaveis{->lista_variavel*}				=	lista_variavel*{->[lista_variavel.lista_variavel]};
 	
+=======
+	
+	lista_variaveis{->lista_variavel*}				=	lista_variavel*{->[lista_variavel.lista_variavel]};
+	
+>>>>>>> origin/master
 	lista_variavel{->lista_variavel}			= 		{varios}identificador virgula lista_variavel{->New lista_variavel.varios(identificador,lista_variavel)}|
 														{unico}identificador{->New lista_variavel.unico(identificador)};
 														
@@ -152,7 +158,8 @@ Productions
 	
 	tipo_base{->tipo} 								=	{inteiro} int 			{-> New tipo.inteiro(int)}|
 														{flutuante}float 		{->New tipo.flutuante(float)}|
-														{caractere} char 		{->New tipo.caractere(char)};
+														{caractere} char 		{->New tipo.caractere(char)}|
+														{string} string			{->New tipo.string(string)};
 	
 	valores{->valores}      						=  	tipo_base_valores{->tipo_base_valores.valores};
 					
@@ -177,6 +184,7 @@ Productions
 														{menor}identificador menor expressao{->New expressao.menor(identificador,expressao)}|
 														{chamada}chamada_funcao{->New expressao.chamada(chamada_funcao)};
 														
+<<<<<<< HEAD
 	laco{->laco} 									= 	{for}  for parenteses_e condicao_for parenteses_d corpo{-> New laco.for(condicao_for, [corpo.bloco])}|
 														{foreach}foreach parenteses_e condicao_foreach parenteses_d corpo{-> New laco.foreach(condicao_foreach, [corpo.bloco])};
 			
@@ -184,6 +192,12 @@ Productions
 														{decremento}declaracao_variavel menor semi identificador decremento{->New condicao_for.decremento(declaracao_variavel,menor,identificador,decremento)};
 	
 	condicao_foreach{->condicao_foreach}			=	tipo identificador dois_pontos [lol]:identificador{->New condicao_foreach(tipo,identificador,lol.identificador)};
+=======
+	laco{->laco} 									= 	{for}  for parenteses_e condicao_for parenteses_d corpo{-> New laco.for(condicao_for, [corpo.bloco])};
+			
+	condicao_for{->condicao_for} 					= 	{incremento}declaracao_variavel expressao identificador incremento{->New condicao_for.incremento(declaracao_variavel,expressao,incremento)}|
+														{decremento}declaracao_variavel menor semi identificador decremento{->New condicao_for.decremento(declaracao_variavel,menor,identificador,decremento)};
+>>>>>>> origin/master
 														
 Abstract Syntax Tree
 	
@@ -220,10 +234,14 @@ Abstract Syntax Tree
 														{repeticao}laco|
 														{exps}expressao;
 	
+<<<<<<< HEAD
 	laco											=	{for} condicao_for bloco*|
 														{foreach}condicao_foreach bloco*;
 														
 	condicao_foreach								=	tipo [left]:identificador [lol]:identificador;
+=======
+	laco											=	{for} condicao_for bloco*;
+>>>>>>> origin/master
 	
 	condicao_for									=	{incremento}declaracao_variavel expressao incremento|
 														{decremento}declaracao_variavel menor identificador decremento;
@@ -241,6 +259,7 @@ Abstract Syntax Tree
 	tipo 											= 	{inteiro} int|
 														{flutuante}float|
 														{void}void|
-														{caractere} char;
+														{caractere} char|
+														{string} string;
 	
 	
