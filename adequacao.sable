@@ -131,7 +131,7 @@ Productions
 	
 	lista_variaveis{->lista_variavel*}				=	lista_variavel*{->[lista_variavel.lista_variavel]};
 	
-	lista_variavel{->lista_variavel}			= 		{varios}identificador virgula lista_variavel{->New lista_variavel.varios(identificador,lista_variavel)}|
+	lista_variavel{->lista_variavel}				= 	{varios}identificador virgula lista_variavel{->New lista_variavel.varios(identificador,lista_variavel)}|
 														{unico}identificador{->New lista_variavel.unico(identificador)};
 														
 	/*operacao_aritmetica{->operacao_aritmetica} 		=	{soma} valores op operacao_aritmetica{->New operacao_aritmetica.soma(left.operacao_aritmetica,right.operacao_aritmetica)}|					
@@ -172,13 +172,13 @@ Productions
 	parametros_variaveis{->parametros_variaveis} 	=	{varios}virgula{->New parametros_variaveis.varios(virgula)}|
 														{unico}tipo identificador{->New parametros_variaveis.unico(tipo,identificador)};
 	
-	corpo{->bloco*} 	    							= 	chave_e bloco* chave_d{-> [bloco.bloco]};
+	corpo{->bloco*} 	    						= 	chave_e bloco* chave_d{-> [bloco.bloco]};
 	
-	bloco{->bloco}									=	declaracao_variavel semi{-> New bloco(declaracao_variavel)}|
+	bloco{->bloco}									=	
 														{atribuicao}atribuicao_variavel semi{->New bloco.atribuicao(atribuicao_variavel)}|
 														{funcao}chamada_funcao{-> New bloco.funcao(chamada_funcao)}|
-														{repeticao}laco{->New bloco.repeticao(laco)}|
 														{condicional}condicional{->New bloco.condicional(condicional)}|
+														{repeticao}laco{->New bloco.repeticao(laco)}|
 														{exps}return expressao{->New bloco.exps(expressao)};
 	
 	expressao{->expressao}							=	valores {->New expressao(valores)}|
@@ -201,11 +201,10 @@ Productions
 														
 	
 	condicao_foreach{->condicao_foreach}			=	{unico}declaracao_variavel dois_pontos identificador {->New condicao_foreach.unico(declaracao_variavel,identificador)};
-	
-	condicional{-> condicional} = {if} if parenteses_e expressao parenteses_d corpo {->New condicional.if( expressao, [corpo.bloco])}
-								  |{if_else} if parenteses_e expressao parenteses_d [first]:corpo else [second]:corpo {->New condicional.if_else(expressao, [first.bloco], [second.bloco])};
-
 														
+
+	condicional{-> condicional} 					= 	{if} if parenteses_e expressao parenteses_d corpo {->New condicional.if( expressao, [corpo.bloco])}
+														|{if_else} if parenteses_e expressao parenteses_d [first]:corpo else [second]:corpo {->New condicional.if_else(expressao, [first.bloco], [second.bloco])};
 Abstract Syntax Tree
 	
 	programa 										=	declaracao*;
@@ -237,7 +236,7 @@ Abstract Syntax Tree
 	
 	declaracao_funcao								=	tipo identificador parametros_variaveis* bloco*;
 	
-	bloco											=	declaracao_variavel|
+	bloco											=	
 														{atribuicao}atribuicao_variavel|
 														{funcao}chamada_funcao|
 														{repeticao}laco|
@@ -275,7 +274,8 @@ Abstract Syntax Tree
 														{flutuante}float|
 														{void}void|
 														{caractere} char;
+														
+	condicional 									= 	{if} expressao bloco*
+														|{if_else} expressao [first]:bloco* [second]:bloco*;
 	
-	condicional = {if} expressao bloco*
-				  ||{if_else} expressao [first]:bloco* [second]:bloco*;
 	

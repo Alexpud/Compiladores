@@ -1,14 +1,12 @@
-int a;
-int a;
+int b = 4;
 int a()
 {
-	int a = 4;
-	for(a = 0;(a < (a));a=++)
-	{
-		a();
+	b = 4 + 2;
+	for(a = 0;a <= 4;a=++){
 	}
-	for each(int b : a )
+	if(a == (a < 4))
 	{
 	}
-	b();
+	
+	
 }
