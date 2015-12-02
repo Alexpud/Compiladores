@@ -19,6 +19,7 @@ public class Symbol {
                 return true;
             }catch(Exception e)
             {
+                System.err.println("ERRO -> Tipo invalido: o valor ("+ valor.trim() + ") nao eh um (int)");
                 return false;
             }
         }else if(tipo.trim().equals("float"))
@@ -29,6 +30,7 @@ public class Symbol {
                 return true;
             }catch(Exception e)
             {
+                System.err.println("ERRO -> Tipo invalido: o valor ("+ valor.trim() + ") nao eh um (float)");
                 return false;
             }
         }else if(tipo.trim().equals("char"))
@@ -43,10 +45,13 @@ public class Symbol {
             }
             else
             {
+                System.err.println("ERRO -> Tipo invalido: o valor ("+ valor.trim() + ") nao eh um (char)");
                 return false;
             }
         }else
         {
+            //valor = valor.trim().substring(1, valor.length()-2);
+            //System.out.println("String: "+ valor );
             return true;
         }
     }
