@@ -28,6 +28,7 @@ public class MySemantic extends DepthFirstAdapter{
     public void outAPrograma(APrograma node) {
         // TODO Auto-generated method stub
         System.out.println("End Execute");
+        System.out.println(symbol_table.toString());
     }
     
     //pega declaracoes do tipo: int a = 6;
@@ -51,9 +52,26 @@ public class MySemantic extends DepthFirstAdapter{
             ACriacaoAtribuicaoDeclaracaoVariavel node) {
         // TODO Auto-generated method stub
         String tipo = node.getTipo().toString();
-        String tipo1 = node.getIdentificador().toString();
-        String tipo2 = node.getValores().toString();
-        System.out.println(tipo+tipo1+tipo2);
+        String id = node.getIdentificador().toString();
+        String value = node.getValores().toString();
+        
+        System.out.println("Tipo:"+tipo + tipo.length());
+        System.out.println("Valor:"+value);
+        
+        //verificacao de tipo
+        Symbol b = new Symbol(tipo, value);
+        if(!b.isAceita())
+        {
+            System.err.println("Tipo invalido");
+        }
+        else
+        {
+            if(!symbol_table.containsKey(id)) //variavel com o mesmo nome
+                symbol_table.put(id, value);
+            else
+                System.err.println("Variavel ja definida");
+        }
+        //System.out.println(tipo+tipo1+tipo2);
     }
     
     //pega o array
