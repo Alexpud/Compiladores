@@ -9,6 +9,21 @@ public class Symbol {
         this.setTipo(tipo);
         this.setValor(valor);
     }
+    
+    public boolean isAceita()
+    {
+        if(tipo.trim().equals("int")){
+            try
+            {
+                int temp = Integer.parseInt(valor.trim());
+                return true;
+            }catch(Exception e)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 
     public String getTipo() {
         return tipo;
