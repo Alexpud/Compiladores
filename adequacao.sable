@@ -73,7 +73,7 @@ Tokens
 	{normal}colchete_d						= ']' sp*;
 	{normal}parenteses_d 					= ')' sp*;
 	{normal}semi							= ';' lf?;
-	{normal}virgula 							= ',';
+	{normal}virgula 						= ',' sp*;
 	{normal}dois_pontos						= ':' sp*;
 
 	//Espaco
@@ -151,7 +151,9 @@ Productions
 	declaracao_funcao{->declaracao_funcao}			=	tipo identificador parenteses_e parametros parenteses_d corpo{-> New declaracao_funcao(tipo,identificador,[parametros.parametros_variaveis],[corpo.bloco])};
 														
 	
-	chamada_funcao{->chamada_funcao}				=	identificador parenteses_e parametros parenteses_d semi{-> New chamada_funcao(identificador,[parametros.parametros_variaveis])};
+	chamada_funcao{->chamada_funcao}				=	identificador parenteses_e pa parenteses_d{-> New chamada_funcao(identificador,pa.pa)};
+	
+	pa{->pa}										= {vazio}| {expre}expressao{->New pa.expre(expressao)};
 	
 	tipo{->tipo}									= 	tipo_base				{-> tipo_base.tipo}|
 														{void}void				{-> New tipo.void(void)};
@@ -169,28 +171,33 @@ Productions
 									
 	parametros{->parametros_variaveis*}				=	parametros_variaveis*{->[parametros_variaveis.parametros_variaveis]};
 	
-	parametros_variaveis{->parametros_variaveis} 	=	{varios}virgula{->New parametros_variaveis.varios(virgula)}|
+	parametros_variaveis{->parametros_variaveis} 	=	{varios}virgula tipo identificador{->New parametros_variaveis.varios(tipo,identificador)}|
 														{unico}tipo identificador{->New parametros_variaveis.unico(tipo,identificador)};
 	
 	corpo{->bloco*} 	    						= 	chave_e bloco* chave_d{-> [bloco.bloco]};
 	
 	bloco{->bloco}									=	
 														{atribuicao}atribuicao_variavel semi{->New bloco.atribuicao(atribuicao_variavel)}|
-														{funcao}chamada_funcao{-> New bloco.funcao(chamada_funcao)}|
+														{funcao}chamada_funcao semi{-> New bloco.funcao(chamada_funcao)}|
 														{condicional}condicional{->New bloco.condicional(condicional)}|
 														{repeticao}laco{->New bloco.repeticao(laco)}|
 														{exps}return expressao{->New bloco.exps(expressao)};
 	
+	
 	expressao{->expressao}							=	valores {->New expressao(valores)}|
+														{varios_valores}valores virgula expressao{->New expressao.varios_valores(valores,expressao)}|
 														{exp}parenteses_e expressao parenteses_d{->New expressao.exp(expressao.expressao)}|
-														{menor}identificador menor expressao{->New expressao.menor(identificador,expressao)}|
-														{maior}identificador maior expressao{->New expressao.maior(identificador,expressao)}|
-														{menor_igual}identificador menor_igual expressao{-> New expressao.menor_igual(identificador,expressao)}|
-														{maior_igual}identificador maior_igual expressao{-> New expressao.maior_igual(identificador,expressao)}|
-														{igual}identificador equal expressao{-> New expressao.igual(identificador,expressao)}|
+														{menor}valores menor expressao{->New expressao.menor(valores,expressao)}|
+														{maior}valores maior expressao{->New expressao.maior(valores,expressao)}|
+														{menor_igual}valores menor_igual expressao{-> New expressao.menor_igual(valores,expressao)}|
+														{maior_igual}valores maior_igual expressao{-> New expressao.maior_igual(valores,expressao)}|
+														{igual}valores equal expressao{-> New expressao.igual(valores,expressao)}|
 														{inc} incremento{->New expressao.inc(incremento)}|
 														{dec}decremento{->New expressao.dec(decremento)}|
-														{chamada}chamada_funcao{->New expressao.chamada(chamada_funcao)};
+														{chamada}chamada_funcao{->New expressao.chamada(chamada_funcao)}|
+														{chamada_varios}chamada_funcao virgula expressao{->New expressao.chamada_varios(chamada_funcao,expressao)};
+														
+							
 														
 	laco{->laco} 									= 	{for}  for parenteses_e condicao_for parenteses_d corpo				{-> New laco.for(condicao_for, [corpo.bloco])}|
 														{foreach}foreach parenteses_e condicao_foreach parenteses_d corpo{-> New laco.foreach(condicao_foreach, [corpo.bloco])}|
@@ -255,20 +262,25 @@ Abstract Syntax Tree
 	lista_atribuicao_variavel						=	lista_variavel* expressao;
 														
 	expressao										=	valores|
+														{varios_valores}valores expressao|
 														{exp}expressao|
-														{menor} identificador expressao|
-														{maior} identificador expressao|
-														{menor_igual}identificador expressao|
-														{maior_igual}identificador expressao|
-														{igual}identificador expressao|
+														{menor} valores expressao|
+														{maior} valores expressao|
+														{menor_igual}valores expressao|
+														{maior_igual}valores expressao|
+														{igual}valores expressao|
 														{inc}incremento|
 														{dec}decremento|
-														{chamada}chamada_funcao;
+														{chamada}chamada_funcao|
+														{chamada_varios}chamada_funcao expressao
+														|{vazio};
 														
-	chamada_funcao									=	identificador parametros_variaveis*;
+	chamada_funcao									=	identificador pa;
+	
+	pa = {vazio}|{expre}expressao;
 	
 	parametros_variaveis							=	{unico}tipo identificador|
-														{varios}virgula;
+														{varios}tipo identificador;
 	
 	tipo 											= 	{inteiro} int|
 														{flutuante}float|
