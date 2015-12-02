@@ -57,11 +57,13 @@ Tokens
 	{normal}int 							= 'int' sp*;
 	{normal}char 							= 'char' sp*;
 	{normal}float 							= 'float' sp*;
+	{normal}string							= 'string' sp*;
 
 	//Tipos alguma coisa
 	{normal}num_int 						= ('0x')?digit+ sp*;
 	{normal}caractere_char 					= apostrofo caractere apostrofo sp*;
 	{normal}float_number 					= digit+ '.'(digit+|'e'('+'|'-')digit+) sp*;
+	{normal}cadeia_caracteres				= '"' [all - [[10 + 13] + '"']]* '"';
 
 
 
@@ -160,14 +162,16 @@ Productions
 	
 	tipo_base{->tipo} 								=	{inteiro} int 			{-> New tipo.inteiro(int)}|
 														{flutuante}float 		{->New tipo.flutuante(float)}|
-														{caractere} char 		{->New tipo.caractere(char)};
+														{caractere} char 		{->New tipo.caractere(char)}|
+														{string}string			{->New tipo.string(string)};
 	
 	valores{->valores}      						=  	tipo_base_valores{->tipo_base_valores.valores}|
 														{id}identificador{->New valores.id(identificador)};
 					
 	tipo_base_valores{->valores}					= 	{numerointeiro}num_int   {-> New valores.numerointeiro(num_int)}|
 														{caractere}caractere_char{-> New valores.caractere(caractere_char)}|
-														{numerofloat}float_number{-> New valores.numerofloat(float_number)};
+														{numerofloat}float_number{-> New valores.numerofloat(float_number)}|
+														{string}cadeia_caracteres{-> New valores.string(cadeia_caracteres)};
 									
 	parametros{->parametros_variaveis*}				=	parametros_variaveis*{->[parametros_variaveis.parametros_variaveis]};
 	
@@ -239,7 +243,8 @@ Abstract Syntax Tree
 	valores											=	{id}identificador|
 														{numerointeiro}num_int|
 														{caractere}caractere_char|
-														{numerofloat}float_number;
+														{numerofloat}float_number|
+														{string}cadeia_caracteres;
 	
 	declaracao_funcao								=	tipo identificador parametros_variaveis* bloco*;
 	
@@ -285,7 +290,8 @@ Abstract Syntax Tree
 	tipo 											= 	{inteiro} int|
 														{flutuante}float|
 														{void}void|
-														{caractere} char;
+														{caractere} char|
+														{string} string;
 														
 	condicional 									= 	{if} expressao bloco*
 														|{if_else} expressao [first]:bloco* [second]:bloco*;
