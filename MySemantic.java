@@ -1,13 +1,18 @@
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Stack;
+import java.util.StringTokenizer;
+
 import analysis.DepthFirstAdapter;
 import node.AArrayDeclaracaoVariavel;
 import node.ACriacaoAtribuicaoDeclaracaoVariavel;
+import node.ADecExpressao;
 import node.ADeclaracao;
 import node.ADeclaracaoVariavel;
 import node.AListaAtribuicaoVariavel;
 import node.APrograma;
 import node.AUnicoListaVariavel;
+import node.AVariosListaVariavel;
 
 public class MySemantic extends DepthFirstAdapter{
     
@@ -51,27 +56,50 @@ public class MySemantic extends DepthFirstAdapter{
     public void outACriacaoAtribuicaoDeclaracaoVariavel(
             ACriacaoAtribuicaoDeclaracaoVariavel node) {
         // TODO Auto-generated method stub
-        String tipo = node.getTipo().toString();
-        String id = node.getIdentificador().toString();
-        String value = node.getValores().toString();
         
-        //System.out.println("Tipo:"+tipo + tipo.length());
-        //System.out.println("Valor:"+value);
+        //Estruturas de dados para tratar as declaracoes de variaveis da forma: int a,b,c = 7;
+        StringTokenizer st;
+        ArrayList<String> variables = new ArrayList<>();
+        
+        
+        String tipo = node.getTipo().toString().trim();
+        String id = node.getListaVariavel().toString().trim();
+        String value = node.getValores().toString().trim();
+        
+        //verifica se existe mais de um identificador
+        if(id.length() > 2)
+        {
+            st = new StringTokenizer(id);
+            while(st.hasMoreElements())
+            {
+                variables.add(st.nextToken(" ")); // divide os identificadores
+            }
+        }
         
         //verificacao de tipo
         Symbol b = new Symbol(tipo, value);
-        /*if(!b.isAceita())
-        {
-            //System.err.println("Tipo invalido");
-        }*/
+        
+        //Verifica se aceita 
         if(b.isAceita())
         {
-            if(!symbol_table.containsKey(id)) //variavel com o mesmo nome
-                symbol_table.put(id, value);
-            else
-                System.err.println("Variavel ja definida");
+            if(variables.size() < 1) // caso a declaracao for no estilo: int a = 7;
+            {
+                if(!symbol_table.containsKey(id)) //variavel com o mesmo nome
+                    symbol_table.put(id, value);
+                else
+                    System.err.println("ERRO -> A Variavel: (" + id + ") ja foi definida");
+            }
+            else // caso for a declaracao composta
+            {
+                for (int i = 0; i < variables.size(); i++) {
+                    if(!symbol_table.containsKey(variables.get(i))) //variavel com o mesmo nome
+                        symbol_table.put(variables.get(i), value);
+                    else
+                        System.err.println("ERRO -> A Variavel: (" + variables.get(i) + ") ja foi definida");
+                }
+                variables.clear();
+            }
         }
-        //System.out.println(tipo+tipo1+tipo2);
     }
     
     //pega o array
@@ -81,5 +109,11 @@ public class MySemantic extends DepthFirstAdapter{
         String tipo = node.getTipo().toString();
         //System.out.println(tipo);
     }
-    
+
+    @Override
+    public void outAVariosListaVariavel(AVariosListaVariavel node) {
+        // TODO Auto-generated method stub
+        String tipo = node.getListaVariavel().toString();
+        //System.out.println(tipo);
+    }
 }
