@@ -21,8 +21,34 @@ public class Symbol {
             {
                 return false;
             }
+        }else if(tipo.trim().equals("float"))
+        {
+            try
+            {
+                float temp = Float.parseFloat(valor.trim());
+                return true;
+            }catch(Exception e)
+            {
+                return false;
+            }
+        }else if(tipo.trim().equals("char"))
+        {
+            //verificacao do char
+            if(valor.trim().contains("\'")){
+                if(valor.trim().length() < 2)
+                {
+                    return true;
+                }
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }else
+        {
+            return true;
         }
-        return true;
     }
 
     public String getTipo() {
