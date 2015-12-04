@@ -219,7 +219,7 @@ Productions
 														{while} while parenteses_e expressao parenteses_d corpo{-> New laco.while(expressao, corpo)};
 														
 			
-	condicao_for{->condicao_for} 					= 	{incremento}[left]:lista_atribuicao_variavel [lefft]:semi expressao [rght]:semi [right]:lista_atribuicao_variavel{->New condicao_for.incremento(left.lista_atribuicao_variavel,expressao,right.lista_atribuicao_variavel)};
+	condicao_for{->condicao_for} 					= 	{incremento}[left]:lista_expressao [lefft]:semi expressao [rght]:semi [right]:lista_expressao{->New condicao_for.incremento(left.lista_expressao,expressao,right.lista_expressao)};
 														
 	
 	condicao_foreach{->condicao_foreach}			=	{unico}declaracao_variavel dois_pontos identificador {->New condicao_foreach.unico(declaracao_variavel,identificador)};
@@ -282,7 +282,7 @@ Abstract Syntax Tree
 														
 	condicao_foreach								=	{unico}declaracao_variavel identificador;
 	
-	condicao_for									=	{incremento}[left]:lista_atribuicao_variavel expressao [right]:lista_atribuicao_variavel;
+	condicao_for									=	{incremento}[left]:lista_expressao expressao [right]:lista_expressao;
 														
 	lista_atribuicao_variavel						=	[left]:atribuicao_variavel|
 														{unico}atribuicao_variavel;
