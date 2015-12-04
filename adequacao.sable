@@ -2,7 +2,7 @@ Helpers
 	all = [0 .. 0xFFFF];
     	digit = ['0' .. '9'] ;
     	hex = [0..0x0fff];
-    	caractere = ['a'..'z'] | ['A'..'Z'];
+    	caractere = ['a'..'z'] | ['A'..'Z']| '_';
    	tab = 9;
 	lf = 10;
 	cr = 13;
@@ -19,9 +19,9 @@ Tokens
 /* eol = fim de linha */
 
 	//Lacos
-	{normal}for 							= 'for';
-	{normal}foreach							= 'for each';
-	{normal}while 							= 'while';
+	{normal}for 							= 'for' sp*;
+	{normal}foreach							= 'for each' sp*;
+	{normal}while 							= 'while' sp*;
 
 	//Condicionais
 	{normal}if 								= 'if' sp*;
@@ -89,11 +89,9 @@ Tokens
 	{normal} line_comment 					= '//'[all - [10 + 13]]* (10 | 13);
 	sp = ' ' sp*;
 
-	{normal}begin 							= 'begin';
-	{normal}end 							= 'end';
 	{normal}return 							= 'return' sp*;
-	{normal}void 							= 'void';
-	{normal}new 							= 'new';
+	{normal}void 							= 'void' sp*;
+	{normal}new 							= 'new' sp*;
 
 	{normal} blank 							= (eol | tab | ' ')+;
 
@@ -120,14 +118,19 @@ Productions
 	
 	declaracoes{->declaracao*} 						=	declaracao*{->[declaracao.declaracao]};
 	
-	declaracao{->declaracao}						= 	declaracao_variavel{-> New declaracao(declaracao_variavel)}|
+	declaracao{->declaracao}						= 	declaracao_variavel semi{-> New declaracao(declaracao_variavel)}|
 														{funcao}declaracao_funcao{-> New declaracao.funcao(declaracao_funcao)};
 														
 	declaracao_variaveis{->declaracao_variavel*}	=	declaracao_variavel*{->[declaracao_variavel.declaracao_variavel]};
 	
 	declaracao_variavel{->declaracao_variavel}		= 	tipo lista_variavel  {-> New declaracao_variavel(lista_variavel)}|
-														{com_semi}tipo lista_variavel semi {-> New declaracao_variavel.com_semi(lista_variavel)}|
-														{array}tipo colchete_e colchete_d lista_variavel{-> New declaracao_variavel.array(tipo,lista_variavel)};
+														{com_semi}tipo lista_variavel semi{-> New declaracao_variavel.com_semi(lista_variavel)}|
+														{array}tipo colchetes lista_variavel{-> New declaracao_variavel.array(tipo,lista_variavel)}|
+														{array_semi}tipo colchetes lista_variavel semi{-> New declaracao_variavel.array_semi(tipo,lista_variavel)};
+														
+														
+	colchetes										=	colchete_e colchete_d colchetes|
+														{um}colchete_e colchete_d;
 														
 	atribuicao_variavel{->atribuicao_variavel}		=	identificador attr expr{-> New atribuicao_variavel(identificador,expr)}|
 														{array}identificador colchete_e [left]:expressao colchete_d attr [right]:expressao{-> New atribuicao_variavel.array(identificador,left.expressao,right.expressao)};
@@ -136,7 +139,7 @@ Productions
 																{unico}atribuicao_variavel{->New lista_atribuicao_variavel.unico(atribuicao_variavel)};
 		
 	lista_variavel{->lista_variavel}				= 	{varios}identificador virgula lista_variavel{->New lista_variavel.varios(identificador,lista_variavel)}|
-														{array}identificador colchete_e expressao colchete_d{-> New lista_variavel.array(identificador,expressao)}|
+														{array}identificador colchetes{-> New lista_variavel.array(identificador)}|
 														{unico}identificador{->New lista_variavel.unico(identificador)};
 								
 														
@@ -163,6 +166,7 @@ Productions
 														
 	
 	tipo{->tipo}									= 	tipo_base				{-> tipo_base.tipo}|
+													
 														{void}void				{-> New tipo.void(void)};
 	
 	tipo_base{->tipo} 								=	{inteiro} int 			{-> New tipo.inteiro(int)}|
@@ -181,8 +185,10 @@ Productions
 									
 	parametros{->parametros_variaveis*}				=	parametros_variaveis*{->[parametros_variaveis.parametros_variaveis]};
 	
-	parametros_variaveis{->parametros_variaveis} 	=	{varios}virgula tipo identificador{->New parametros_variaveis.varios(tipo,identificador)}|
-														{unico}tipo identificador{->New parametros_variaveis.unico(tipo,identificador)};
+	parametros_variaveis{->parametros_variaveis} 	=	{varios}virgula tipo  identificador{->New parametros_variaveis.varios(tipo,identificador)}|
+														{varios_array}virgula tipo colchetes identificador{-> New parametros_variaveis.varios_array(tipo,identificador)}|
+														{unico}tipo  identificador{->New parametros_variaveis.unico(tipo,identificador)}|
+														{unico_array}tipo colchetes identificador{->New parametros_variaveis.unico_array(tipo,identificador)};
 	
 	corpo{->corpo}									=	chave_e declaracao_variaveis blocos chave_d {->New corpo([declaracao_variaveis.declaracao_variavel],[blocos.bloco])};
 	
@@ -192,7 +198,7 @@ Productions
 														{funcao}chamada_funcao semi{-> New bloco.funcao(chamada_funcao)}|
 														{condicional}condicional{->New bloco.condicional(condicional)}|
 														{repeticao}laco{->New bloco.repeticao(laco)}|
-														{exps}return expressao semi{->New bloco.exps(expressao)}|
+														{retorno}return expressao semi{->New bloco.retorno(expressao)}|														
 														{escopo}corpo{->New bloco.escopo(corpo)};
 	
 	
@@ -205,13 +211,15 @@ Productions
 														{maior_igual}valores maior_igual expressao{-> New expressao.maior_igual(valores,expressao)}|
 														{igual}valores equal expressao{-> New expressao.igual(valores,expressao)}|
 														{chamada}chamada_funcao{->New expressao.chamada(chamada_funcao)}|
+														{soma}valores soma expressao{->New expressao.soma(valores,expressao)}|
+														{subtracao}valores menos expressao{->New expressao.subtracao(valores,expressao)}|
 														//{chamada_varios}chamada_funcao{->New expressao.chamada_varios(chamada_funcao,expressao)}|
+														{vazio}|
 														{atribuicao}atribuicao_variavel{->New expressao.atribuicao(atribuicao_variavel)};		
 
 															
 	lista_expressao{->lista_expressao}				=	expressao virgula lista_expressao{->New lista_expressao(expressao,lista_expressao)}|
-														{um}expressao{->New lista_expressao.um(expressao)}|
-														{vazio};
+														{um}expressao{->New lista_expressao.um(expressao)};
 																				
 														
 	laco{->laco} 									= 	{for}  for parenteses_e condicao_for parenteses_d corpo				{-> New laco.for(condicao_for, corpo)}|
@@ -237,10 +245,11 @@ Abstract Syntax Tree
 														
 	declaracao_variavel 							=	lista_variavel|
 														{com_semi}lista_variavel|
-														{array}tipo lista_variavel;
+														{array}tipo lista_variavel|
+														{array_semi}tipo lista_variavel;
 														
 	lista_variavel									=	{varios}identificador lista_variavel|	
-														{array}identificador expressao|
+														{array}identificador|
 														{unico}identificador;
 														
 	expr 											= 	{plus} [left]:expr [right]:expr| 
@@ -270,7 +279,7 @@ Abstract Syntax Tree
 														{funcao}chamada_funcao|
 														{repeticao}laco|
 														{condicional}condicional|
-														{exps}expressao|
+														{retorno}expressao|
 														{escopo}corpo;
 														
 	atribuicao_variavel								=	identificador expr|
@@ -296,13 +305,15 @@ Abstract Syntax Tree
 														{maior_igual}valores expressao|
 														{igual}valores expressao|
 														{chamada}chamada_funcao|
+														{soma}valores expressao|
+														{subtracao}valores expressao|
+														{vazio}|
 														//{chamada_varios}chamada_funcao expressao|
 														{atribuicao}atribuicao_variavel;
 														
 														
 	lista_expressao									=	expressao lista_expressao|
-														{um}expressao|	
-														{vazio};
+														{um}expressao;
 														
 														
 														
@@ -312,7 +323,9 @@ Abstract Syntax Tree
 														{unico}expressao;
 	
 	parametros_variaveis							=	{unico}tipo identificador|
-														{varios}tipo identificador;
+														{unico_array}tipo identificador|
+														{varios}tipo identificador|
+														{varios_array}tipo identificador;
 	
 	tipo 											= 	{inteiro} int|
 														{flutuante}float|
