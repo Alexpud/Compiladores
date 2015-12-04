@@ -13,7 +13,7 @@ public class Main {
          try {
             start_time = System.currentTimeMillis();
             /* Form our AST */
-            Lexer lexer = new Lexer (new PushbackReader(
+            MyLexer lexer = new MyLexer (new PushbackReader(
                new FileReader(args[0]), 1024));
             /*while(!lexer.peek().getText().equals(""))
             {
