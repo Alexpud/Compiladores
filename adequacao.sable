@@ -192,7 +192,7 @@ Productions
 														{funcao}chamada_funcao semi{-> New bloco.funcao(chamada_funcao)}|
 														{condicional}condicional{->New bloco.condicional(condicional)}|
 														{repeticao}laco{->New bloco.repeticao(laco)}|
-														{exps}return expressao{->New bloco.exps(expressao)}|
+														{exps}return expressao semi{->New bloco.exps(expressao)}|
 														{escopo}corpo{->New bloco.escopo(corpo)};
 	
 	
