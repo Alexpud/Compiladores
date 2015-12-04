@@ -86,7 +86,7 @@ Tokens
 	{comment} comment_corpo 					= [all - ['*' + '/']]*;
 	{comment} asteristico 							= '*';
 	{comment} barra 						= '/';
-	{normal} line_comment 					= '//'[all - 10]*10*;
+	{normal} line_comment 					= '//'[all - [10 + 13]]* (10 | 13);
 	sp = ' ' sp*;
 
 	{normal}begin 							= 'begin';
