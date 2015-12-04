@@ -1,13 +1,18 @@
-int b,c = 4;
+int b,c;
 int a(int a)
-{
+{	
+	a[ 4 ] = 4;
+	a= 4;
 	a(a(),4);
+	{
+		int b;
+		a = 4;
+	}
 	b = 4 + 2;
-	for(a = 0;a <= 4;a=++){
+	for(a = 0;a <= 4;a=4){
 	}
 	if(a == (a < 4))
 	{
 	}
-	
 	
 }
