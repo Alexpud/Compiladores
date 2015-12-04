@@ -33,7 +33,7 @@ Tokens
 	{normal}soma							= '+' sp*;
 	{normal}menos							= '-' sp*;
 	{normal}multiplicacao 					= '*'  sp*;
-	{normal}divisao  						=  '\' sp*;
+	{normal}divisao  						=  '/' sp*;
 	{normal}attr 							= '=' sp*;
 	{normal}incremento						= '++';
 	{normal}decremento						= '--';

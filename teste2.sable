@@ -1,0 +1,265 @@
+Helpers
+	all = [0 .. 0xFFFF];
+    	digit = ['0' .. '9'] ;
+    	hex = [0..0x0fff];
+    	caractere = ['a'..'z'] | ['A'..'Z'];
+   	tab = 9;
+	lf = 10;
+	cr = 13;
+   	apostrofo = ''';
+   	aspas = '"';
+   	not_eol = [all - [cr + lf]];
+	eol = cr lf | cr | lf;
+	sp = ' ';
+
+States
+	normal, comment;
+
+Tokens
+/* eol = fim de linha */
+
+	//Lacos
+	{normal}for 							= 'for';
+	{normal}foreach							= 'for each';
+	{normal}while 							= 'while';
+
+	//Condicionais
+	{normal}if 								= 'if' sp*;
+	{normal}else 							= 'else';
+	{normal}case 							= 'case' sp*;
+	{normal}switch 							= 'switch';
+
+	//Operadores e atribuicao
+	{normal}soma							= '+' sp*;
+	{normal}menos							= '-' sp*;
+	{normal}multiplicacao 					= '*'  sp*;
+	{normal}divisao  						=  '\' sp*;
+	{normal}attr 							= '=' sp*;
+	{normal}incremento						= '++';
+	{normal}decremento						= '--';
+	
+	
+	//Condicionais
+	
+	{normal}maior 							= '>' sp*;
+	{normal}menor 							= '<' sp*;
+	{normal}equal 							= '==' sp*;
+	{normal}maior_igual 					= '>=' sp*;
+	{normal}menor_igual 					= '<=' sp*;
+	
+	//Operacoes booleanas
+	
+	{normal}and								= '&&' sp*;
+	{normal}or								= '|'  sp*;
+
+	//Tipos
+	{normal}array 							= 'array' sp*;
+	{normal}int 							= 'int' sp*;
+	{normal}char 							= 'char' sp*;
+	{normal}float 							= 'float' sp*;
+
+	//Tipos alguma coisa
+	{normal}num_int 						= ('0x')?digit+ sp*;
+	{normal}caractere_char 					= apostrofo caractere apostrofo sp*;
+	{normal}float_number 					= digit+ '.'(digit+|'e'('+'|'-')digit+) sp*;
+
+
+
+	//Pontuacao
+	{normal}chave_e 						= '{';
+	{normal}chave_d 						= '}';
+	{normal}parenteses_e 					= '(' sp*;
+	{normal}colchete_e						= '[' sp*;
+	{normal}colchete_d						= ']' sp*;
+	{normal}parenteses_d 					= ')' sp*;
+	{normal}semi							= ';' lf?;
+	{normal}virgula 							= ',';
+	{normal}dois_pontos						= ':' sp*;
+
+	//Espaco
+
+	//Comentario
+	{normal->comment, comment} comment 		= '/*';
+	{comment->normal} comment_end 			= '*/';
+	{comment} comment_corpo 					= [all - ['*' + '/']]*;
+	{comment} asteristico 							= '*';
+	{comment} barra 						= '/';
+	{normal} line_comment 					= '//'[all - 10]*10*;
+	sp = ' ' sp*;
+
+	{normal}begin 							= 'begin';
+	{normal}end 							= 'end';
+	{normal}return 							= 'return' sp*;
+	{normal}void 							= 'void';
+	{normal}new 							= 'new';
+
+	{normal} blank 							= (eol | tab | ' ')+;
+
+	//identificador
+	{normal}identificador 					= caractere (caractere|digit)* sp*;
+
+/*Funcionou desse jeito
+	program 								= begin variables end semi;
+	variables 								=  int semi ;
+	*/
+
+	/*Boiolagem de erro quando coloco da forma {coma identificador}
+	  O erro e o seguinte:org.sablecc.sablecc.parser.ParserException: [86,32] expecting: '->'
+		Para contornar esse problema, olhei a documentação do sablecc, e vi que para as producoes para
+		terem opcoes, voce tem que identificar essas opcoes com { identificacao }. Pagina 45 da tese do sablecc.
+*/
+
+Ignored Tokens
+	blank, comment, comment_end, comment_corpo, line_comment;
+
+Productions
+	//Existe a questao da criacao de listas.
+	programa{->programa}							= 	declaracoes{-> New programa ([declaracoes.declaracao])};
+	
+	declaracoes{->declaracao*} 						=	declaracao*{->[declaracao.declaracao]};
+	
+	declaracao{->declaracao}						= 	declaracao_variavel semi{-> New declaracao(declaracao_variavel)}|
+														{funcao}declaracao_funcao{-> New declaracao.funcao(declaracao_funcao)};
+	
+	declaracao_variavel{->declaracao_variavel}		= 	tipo lista_variaveis  {-> New declaracao_variavel([lista_variaveis.lista_variavel])}|
+														{array}tipo colchete_e colchete_d lista_variaveis{-> New declaracao_variavel.array(tipo,[lista_variaveis.lista_variavel])}|
+														{criacao_atribuicao}tipo identificador attr valores {->New declaracao_variavel.criacao_atribuicao(tipo,identificador,valores)};
+														
+	atribuicao_variavel{->atribuicao_variavel}		=	identificador attr expressao{-> New atribuicao_variavel(identificador,expressao.expressao)};
+	
+	lista_atribuicao_variavel{->lista_atribuicao_variavel}	=	lista_variaveis attr expressao{->New lista_atribuicao_variavel([lista_variaveis.lista_variavel],expressao)};
+	
+	lista_variaveis{->lista_variavel*}				=	lista_variavel*{->[lista_variavel.lista_variavel]};
+	
+	lista_variavel{->lista_variavel}			= 		{varios}identificador virgula lista_variavel{->New lista_variavel.varios(identificador,lista_variavel)}|
+														{unico}identificador{->New lista_variavel.unico(identificador)};
+														
+	/*operacao_aritmetica{->operacao_aritmetica} 		=	{soma} valores op operacao_aritmetica{->New operacao_aritmetica.soma(left.operacao_aritmetica,right.operacao_aritmetica)}|					
+														{valor}valores{->New operacao_aritmetica.valor(valores)};*/
+														
+	expr {-> expr}									=	{factor} factor  {-> factor.expr} 
+														|{plus} [left]:expr soma [right]:factor   {-> New expr.plus(left.expr, right.expr)} 
+														|{minus} [left]:expr menos [right]:factor {-> New expr.minus(left.expr, right.expr)};
+
+	factor {-> expr} 								=  	{term} term  {-> term.expr} |
+														{mult} [left]:factor multiplicacao [right]:term   {-> New expr.mult(left.expr, right.expr)} |
+														{div} [left]:factor divisao [right]:term     {-> New expr.div(left.expr, right.expr)};
+
+	term {-> expr} 									=	{number} valores{-> New expr.number(valores)} |
+														{expr} parenteses_e expr parenteses_d	{-> expr.expr};
+	
+	declaracao_funcao{->declaracao_funcao}			=	tipo identificador parenteses_e parametros parenteses_d corpo{-> New declaracao_funcao(tipo,identificador,[parametros.parametros_variaveis],[corpo.bloco])};
+														
+	
+	chamada_funcao{->chamada_funcao}				=	identificador parenteses_e parametros parenteses_d semi{-> New chamada_funcao(identificador,[parametros.parametros_variaveis])};
+	
+	tipo{->tipo}									= 	tipo_base				{-> tipo_base.tipo}|
+														{void}void				{-> New tipo.void(void)};
+	
+	tipo_base{->tipo} 								=	{inteiro} int 			{-> New tipo.inteiro(int)}|
+														{flutuante}float 		{->New tipo.flutuante(float)}|
+														{caractere} char 		{->New tipo.caractere(char)};
+	
+	valores{->valores}      						=  	tipo_base_valores{->tipo_base_valores.valores}|
+														{id}identificador{->New valores.id(identificador)};
+					
+	tipo_base_valores{->valores}					= 	{numerointeiro}num_int   {-> New valores.numerointeiro(num_int)}|
+														{caractere}caractere_char{-> New valores.caractere(caractere_char)}|
+														{numerofloat}float_number{-> New valores.numerofloat(float_number)};
+									
+	parametros{->parametros_variaveis*}				=	parametros_variaveis*{->[parametros_variaveis.parametros_variaveis]};
+	
+	parametros_variaveis{->parametros_variaveis} 	=	{varios}virgula{->New parametros_variaveis.varios(virgula)}|
+														{unico}tipo identificador{->New parametros_variaveis.unico(tipo,identificador)};
+	
+	corpo{->bloco*} 	    							= 	chave_e bloco* chave_d{-> [bloco.bloco]};
+	
+	bloco{->bloco}									=	declaracao_variavel semi{-> New bloco(declaracao_variavel)}|
+														{atribuicao}atribuicao_variavel{->New bloco.atribuicao(atribuicao_variavel)}|
+														{funcao}chamada_funcao{-> New bloco.funcao(chamada_funcao)}|
+														{repeticao}laco{->New bloco.repeticao(laco)}|
+														{exps}return expressao{->New bloco.exps(expressao)};
+	
+	expressao{->expressao}							=	valores {->New expressao(valores)}|
+														{exp}parenteses_e expressao parenteses_d{->New expressao.exp(expressao.expressao)}|
+														{menor}identificador menor expressao{->New expressao.menor(identificador,expressao)}|
+														{maior}identificador maior expressao{->New expressao.maior(identificador,expressao)}|
+														{inc} incremento{->New expressao.inc(incremento)}|
+														{chamada}chamada_funcao{->New expressao.chamada(chamada_funcao)};
+														
+	laco{->laco} 									= 	{for}  for parenteses_e condicao_for parenteses_d corpo				{-> New laco.for(condicao_for, [corpo.bloco])}|
+														{foreach}foreach parenteses_e condicao_foreach parenteses_d corpo{-> New laco.foreach(condicao_foreach, [corpo.bloco])}|
+														{while} while parenteses_e expressao parenteses_d corpo{-> New laco.while(expressao, [corpo.bloco])};
+														
+			
+	condicao_for{->condicao_for} 					= 	{incremento}[left]:lista_atribuicao_variavel [lefft]:semi expressao [lft]:semi [right]:lista_atribuicao_variavel{->New condicao_for.incremento(left.lista_atribuicao_variavel,expressao,right.lista_atribuicao_variavel)};
+														
+	
+	condicao_foreach{->condicao_foreach}			=	{unico}declaracao_variavel dois_pontos identificador {->New condicao_foreach.unico(declaracao_variavel,identificador)};
+														
+Abstract Syntax Tree
+	
+	programa 										=	declaracao*;
+	
+	declaracao 										=	declaracao_variavel|
+														{funcao}declaracao_funcao;
+														
+	declaracao_variavel 							=	lista_variavel*|
+														{array}tipo lista_variavel*|
+														{criacao_atribuicao}tipo identificador valores;
+														
+	lista_variavel									=	{varios}identificador lista_variavel|	
+														{unico}identificador;
+														
+	expr 											= 	{plus} [left]:expr [right]:expr| 
+														{minus} [left]:expr [right]:expr| 
+														{mult} [left]:expr [right]:expr| 
+														{div} [left]:expr [right]:expr| 
+														{mod} [left]:expr [right]:expr| 
+														{number} valores;
+														
+	/*operacao_aritmetica								=	{soma}[left]:operacao_aritmetica [right]:operacao_aritmetica|
+														{valor}valores;*/
+	
+	valores											=	{id}identificador|
+														{numerointeiro}num_int|
+														{caractere}caractere_char|
+														{numerofloat}float_number;
+	
+	declaracao_funcao								=	tipo identificador parametros_variaveis* bloco*;
+	
+	bloco											=	declaracao_variavel|
+														{atribuicao}atribuicao_variavel|
+														{funcao}chamada_funcao|
+														{repeticao}laco|
+														{exps}expressao;
+	atribuicao_variavel								=	identificador expressao;
+
+	laco											=	{for} condicao_for bloco*|
+														{foreach}condicao_foreach bloco*|
+														{while} expressao bloco*;
+														
+	condicao_foreach								=	{unico}declaracao_variavel identificador;
+	
+	condicao_for									=	{incremento}[left]:lista_atribuicao_variavel expressao [right]:lista_atribuicao_variavel;
+														
+	lista_atribuicao_variavel						=	lista_variavel* expressao;
+														
+	expressao										=	valores|
+														{exp}expressao|
+														{menor} identificador expressao|
+														{maior} identificador expressao|
+														{inc}incremento|
+														{chamada}chamada_funcao;
+														
+	chamada_funcao									=	identificador parametros_variaveis*;
+	
+	parametros_variaveis							=	{unico}tipo identificador|
+														{varios}virgula;
+	
+	tipo 											= 	{inteiro} int|
+														{flutuante}float|
+														{void}void|
+														{caractere} char;
+	
+	
