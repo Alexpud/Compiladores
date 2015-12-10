@@ -2,17 +2,12 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Stack;
 import java.util.StringTokenizer;
-
 import analysis.DepthFirstAdapter;
-import node.AArrayDeclaracaoVariavel;
-import node.ACriacaoAtribuicaoDeclaracaoVariavel;
-import node.ADecExpressao;
+import node.AAtribuicaoVariavel;
+import node.AComSemiDeclaracaoVariavel;
 import node.ADeclaracao;
-import node.ADeclaracaoVariavel;
-import node.AListaAtribuicaoVariavel;
 import node.APrograma;
-import node.AUnicoListaVariavel;
-import node.AVariosListaVariavel;
+
 
 public class MySemantic extends DepthFirstAdapter{
     
@@ -20,7 +15,7 @@ public class MySemantic extends DepthFirstAdapter{
     static String TIPO_REAL = "flutuante";
     static String TIPO_CHARACTER = "caractere";
     
-    Hashtable<String, String> symbol_table = new Hashtable<String, String>();
+    Hashtable<String, Symbol> symbol_table = new Hashtable<String, Symbol>();
     Stack<String> pilha = new Stack<>();
     
     @Override
@@ -36,84 +31,82 @@ public class MySemantic extends DepthFirstAdapter{
         System.out.println("Elementos na tabela de simbolos: " + symbol_table.toString());
     }
     
-    //pega declaracoes do tipo: int a = 6;
+    
+    
+    @Override
+    public void outAComSemiDeclaracaoVariavel(AComSemiDeclaracaoVariavel node) {
+        // TODO Auto-generated method stub
+        super.outAComSemiDeclaracaoVariavel(node);
+    }
+
+    //Tratar as atribuicoes
+	@Override
+	public void outAAtribuicaoVariavel(AAtribuicaoVariavel node) {
+		// TODO Auto-generated method stub
+		String str_id = node.getIdentificador().toString();
+		String str_exp = node.getExpressao().toString();
+		
+		StringTokenizer st = new StringTokenizer(str_exp);
+		ArrayList<String> listTokens = new ArrayList<>();
+		
+		
+		Symbol b = symbol_table.get(str_id.trim());
+		
+		while(st.hasMoreTokens())
+		{
+		        listTokens.add(st.nextToken().trim());
+		}
+		for (int i = 0; i < listTokens.size(); i++) {
+		    if(listTokens.get(i).matches("[-*+*]*[0-9]+(.*[0-9]+)?"))
+		    {
+		        
+		    }
+		    else
+		    {
+		        Symbol c = symbol_table.get(listTokens.get(i));
+                if(c != null)
+                {
+                    if(!b.getTipo().equals(c.getTipo()))
+                    {
+                        System.err.println("ERRO -> Tipos Imcompativeis: A variavel:" + 
+                    b.getId() + " e do tipo:" + b.getTipo() + " e a variavel:"+ c.getId() + 
+                    " e do tipo:" + c.getTipo() );
+                    }
+                }
+                else
+                    System.err.println("ERRO -> Variavel nao definida!");
+		    }
+		}
+	}
+
+	//Tratar a declaracao
     @Override
     public void outADeclaracao(ADeclaracao node) {
         // TODO Auto-generated method stub
-        String tipo = node.getDeclaracaoVariavel().toString();
-        //System.out.println(tipo);
-    }
-
-    //pega variaveis do tipo: char c; lista de variaveis [d,f,y,y,y,y] 
-    @Override
-    public void outADeclaracaoVariavel(ADeclaracaoVariavel node) {
-        // TODO Auto-generated method stub
-        String tipo = node.getListaVariavel().toString();
-        //System.out.println(tipo);
-    }
-
-    @Override
-    public void outACriacaoAtribuicaoDeclaracaoVariavel(
-            ACriacaoAtribuicaoDeclaracaoVariavel node) {
-        // TODO Auto-generated method stub
-        
-        //Estruturas de dados para tratar as declaracoes de variaveis da forma: int a,b,c = 7;
+        String str = "";
         StringTokenizer st;
-        ArrayList<String> variables = new ArrayList<>();
+        ArrayList<String> listTokens = new ArrayList<>();
+        ArrayList<Symbol> listSimb = new ArrayList<>();
         
-        
-        String tipo = node.getTipo().toString().trim();
-        String id = node.getListaVariavel().toString().trim();
-        String value = node.getValores().toString().trim();
-        
-        //verifica se existe mais de um identificador
-        if(id.length() > 2)
+        str = node.getDeclaracaoVariavel().toString();
+        st = new StringTokenizer(str);
+     
+        while(st.hasMoreElements())
         {
-            st = new StringTokenizer(id);
-            while(st.hasMoreElements())
-            {
-                variables.add(st.nextToken(" ")); // divide os identificadores
-            }
+            listTokens.add(st.nextToken(" ")); 
         }
         
-        //verificacao de tipo
-        Symbol b = new Symbol(tipo, value);
-        
-        //Verifica se aceita 
-        if(b.isAceita())
-        {
-            if(variables.size() < 1) // caso a declaracao for no estilo: int a = 7;
-            {
-                if(!symbol_table.containsKey(id)) //variavel com o mesmo nome
-                    symbol_table.put(id, value);
-                else
-                    System.err.println("ERRO -> A Variavel: (" + id + ") ja foi definida");
-            }
-            else // caso for a declaracao composta
-            {
-                for (int i = 0; i < variables.size(); i++) {
-                    if(!symbol_table.containsKey(variables.get(i))) //variavel com o mesmo nome
-                        symbol_table.put(variables.get(i), value);
-                    else
-                        System.err.println("ERRO -> A Variavel: (" + variables.get(i) + ") ja foi definida");
-                }
-                variables.clear();
-            }
+        for (int i = 1; i < listTokens.size(); i++) {
+            listSimb.add(new Symbol(listTokens.get(0), listTokens.get(i)));
         }
-    }
-    
-    //pega o array
-    @Override 
-    public void outAArrayDeclaracaoVariavel(AArrayDeclaracaoVariavel node) {
-        // TODO Auto-generated method stub
-        String tipo = node.getTipo().toString();
-        //System.out.println(tipo);
-    }
-
-    @Override
-    public void outAVariosListaVariavel(AVariosListaVariavel node) {
-        // TODO Auto-generated method stub
-        String tipo = node.getListaVariavel().toString();
-        //System.out.println(tipo);
-    }
+        listTokens.clear();
+        
+        for (int i = 0; i < listSimb.size(); i++) {
+            if(!symbol_table.containsKey(listSimb.get(i).getId())) //variavel com o mesmo nome
+                symbol_table.put(listSimb.get(i).getId(), listSimb.get(i));
+            else
+                System.err.println("ERRO -> A Variavel: (" + listSimb.get(i).getId() + ") ja foi definida");
+        }
+        listSimb.clear();
+    }	
 }
