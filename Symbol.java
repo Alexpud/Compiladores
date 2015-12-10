@@ -1,20 +1,22 @@
 
 public class Symbol {
     
-    private String tipo;
-    private String valor;
+    private String tipo = "";
+    private String id = "";
+    private String valor = "";
     
-    public Symbol(String tipo, String valor) {
+    public Symbol(String tipo, String id) {
         // TODO Auto-generated constructor stub
         this.setTipo(tipo);
-        this.setValor(valor);
+        this.id = id;
     }
     
-    public boolean isAceita()
+    public boolean isAcept(String tipo, String valor)
     {
-        if(tipo.trim().equals("int")){
+        if(tipo.trim().equals(tipo)){
             try
             {
+                @SuppressWarnings("unused")
                 int temp = Integer.parseInt(valor.trim());
                 return true;
             }catch(Exception e)
@@ -22,10 +24,11 @@ public class Symbol {
                 System.err.println("ERRO -> Tipo invalido: o valor ("+ valor.trim() + ") nao eh um (int)");
                 return false;
             }
-        }else if(tipo.trim().equals("float"))
+        }else if(tipo.trim().equals(tipo))
         {
             try
             {
+                @SuppressWarnings("unused")
                 float temp = Float.parseFloat(valor.trim());
                 return true;
             }catch(Exception e)
@@ -33,7 +36,7 @@ public class Symbol {
                 System.err.println("ERRO -> Tipo invalido: o valor ("+ valor.trim() + ") nao eh um (float)");
                 return false;
             }
-        }else if(tipo.trim().equals("char"))
+        }else if(tipo.trim().equals(tipo))
         {
             //verificacao do char
             if(valor.trim().contains("\'")){
@@ -71,6 +74,18 @@ public class Symbol {
     public void setValor(String valor) {
         this.valor = valor;
     }
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
     
+	public String toString()
+	{
+	    return tipo + " " + id + " " + valor; 
+	}
     
 }
