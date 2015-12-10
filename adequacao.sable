@@ -124,7 +124,7 @@ Productions
 	declaracao_variaveis{->declaracao_variavel*}	=	declaracao_variavel*{->[declaracao_variavel.declaracao_variavel]};
 	
 	declaracao_variavel{->declaracao_variavel}		= 	tipo lista_variavel  {-> New declaracao_variavel(lista_variavel)}|
-														{com_semi}tipo lista_variavel semi{-> New declaracao_variavel.com_semi(lista_variavel)}|
+														{com_semi}tipo lista_variavel semi{-> New declaracao_variavel.com_semi(tipo, lista_variavel)}|
 														{array}tipo colchetes lista_variavel semi{-> New declaracao_variavel.array(tipo,lista_variavel)};
 																												
 	colchetes										=	colchete_e colchete_d colchetes|
@@ -246,7 +246,7 @@ Abstract Syntax Tree
 														{funcao}declaracao_funcao;
 														
 	declaracao_variavel 							=	lista_variavel|
-														{com_semi}lista_variavel|
+														{com_semi} tipo lista_variavel|
 														{array}tipo lista_variavel;
 														
 	lista_variavel									=	{varios}identificador lista_variavel|	
